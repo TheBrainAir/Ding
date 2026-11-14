@@ -2,7 +2,10 @@
 
 ## Dashboard
 
-Open `dashboard/index.html` in a browser (no build step).
+Open `dashboard/index.html` in a browser. There is no build step. It loads React, Tailwind and Babel from public CDNs, so it needs an internet connection.
 
-- **Usage**: total button uses, split by function (translation, read aloud/questions, allergen info), with daily / weekly / monthly charts. Currently runs on generated demo data; to use real data, replace `demoUsage()` in `dashboard/app.js` with records shaped `{date:'YYYY-MM-DD', translate:n, read:n, allergen:n}`.
-- **Menu admin**: business owners add meal names, photos and ingredients. Common allergens are detected automatically from the ingredients. Menu is stored in the browser (localStorage) for now; **Export JSON** downloads it for loading onto the button.
+- **Usage**: total button uses and uses per function (translation, read aloud, allergen info), each compared with the previous period. A Daily / Weekly / Monthly chart shows exact counts on hover. It currently runs on generated demo data: replace the `USAGE` array in `dashboard/index.html` with records shaped `{ date, translate, read, allergen }`.
+- **Menu**: business owners add meals with a name, photo and ingredients. Allergens (gluten, dairy, eggs, peanuts, tree nuts, soy, fish, shellfish, sesame) are detected from ingredient names, and owners can add or remove any of them before saving. **Export** shows the menu as JSON to load onto the button. The menu is stored in the browser (localStorage) for now.
+- **Effects** switch (top right): optional count-up numbers, card spotlight and fade-in, in the style of ReactBits. Off by default.
+
+The look follows shadcn/ui (zinc palette, black / grey / white), recreated with Tailwind classes rather than installed components.
