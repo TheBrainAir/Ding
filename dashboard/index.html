@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Menu Button Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true">●</span> Smart Menu Button</div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="stats" aria-selected="true">Usage</button>
+    <button class="tab" role="tab" data-tab="menu" aria-selected="false">Menu admin</button>
+  </nav>
+</header>
+
+<main>
+  <!-- USAGE -->
+  <section id="tab-stats" class="panel">
+    <div class="notice">Showing <strong>demo data</strong>. Connect your button's usage log to replace it (see README).</div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Button presses over time</h2>
+        <div class="seg" id="period" role="group" aria-label="Period">
+          <button data-p="daily" class="on">Daily</button>
+          <button data-p="weekly">Weekly</button>
+          <button data-p="monthly">Monthly</button>
+        </div>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div id="chart" class="chart" role="img" aria-label="Stacked bar chart of button usage"></div>
+    </div>
+
+    <div class="card">
+      <h2>What guests used it for</h2>
+      <div id="breakdown"></div>
+    </div>
+  </section>
+
+  <!-- MENU ADMIN -->
+  <section id="tab-menu" class="panel" hidden>
+    <div class="card">
+      <h2 id="form-title">Add a meal</h2>
+      <form id="meal-form" autocomplete="off">
+        <label>Meal name
+          <input id="f-name" required maxlength="80" placeholder="e.g. Pad Thai">
+        </label>
+        <label>Photo
+          <input id="f-photo" type="file" accept="image/*">
+        </label>
+        <div id="f-preview" class="preview" hidden></div>
+        <label>Ingredients <small>(comma separated)</small>
+          <textarea id="f-ingr" rows="3" required placeholder="rice noodles, shrimp, peanuts, egg, tamarind, fish sauce"></textarea>
+        </label>
+        <div>
+          <div class="small-label">Detected allergens</div>
+          <div id="f-allergens" class="chips"><span class="muted">Type ingredients to detect allergens</span></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="submit" id="f-save">Save meal</button>
+          <button class="btn" type="button" id="f-cancel" hidden>Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Your menu <span class="muted" id="count"></span></h2>
+        <div class="row">
+          <button class="btn" id="export">Export JSON</button>
+        </div>
+      </div>
+      <div id="meals" class="meals"></div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
