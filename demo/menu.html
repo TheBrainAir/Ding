@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ginger &amp; Coal &mdash; Menu</title>
+<style>
+@font-face { font-family: "Young Serif"; src: url("fonts/young-serif-400-normal.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-400-normal.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-500-normal.woff2") format("woff2"); font-weight: 500; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-600-normal.woff2") format("woff2"); font-weight: 600; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-700-normal.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "Figtree"; src: url("fonts/figtree-800-normal.woff2") format("woff2"); font-weight: 800; }
+
+:root {
+  --ink: #1c1917;
+  --soft: #4a443f;
+  --mute: #7a726b;
+  --rule: #d9d3cc;
+  --ember: #b2381a;
+  --paper: #ffffff;
+}
+@page { size: 8.5in 11in; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-family: "Figtree", sans-serif; font-size: 9.5pt; line-height: 1.35;
+       -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { width: 8.5in; height: 11in; padding: 0.5in 0.55in 0.45in; display: flex; flex-direction: column;
+         overflow: hidden; break-after: page; position: relative; }
+.page:last-child { break-after: auto; }
+
+/* masthead */
+.mast { text-align: center; margin-bottom: 0.2in; }
+.mast h1 { font-family: "Young Serif", serif; font-weight: 400; font-size: 44pt; line-height: 1; letter-spacing: -0.5pt; }
+.mast .amp { font-style: normal; color: var(--ember); }
+.kicker { font-size: 8.5pt; font-weight: 700; letter-spacing: 2.2pt; text-transform: uppercase; color: var(--ember); margin-bottom: 6pt; }
+.mast .sub { margin-top: 7pt; font-size: 8.5pt; color: var(--soft); letter-spacing: 0.2pt; }
+.mast.small h1 { font-size: 26pt; margin-bottom: 5pt; }
+.mast.small .kicker { margin-bottom: 0; }
+
+/* photo strip */
+.strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.12in; margin-bottom: 0.2in; }
+.strip figure { display: flex; flex-direction: column; }
+.strip img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; border-radius: 3pt; }
+.strip figcaption { margin-top: 3.5pt; font-size: 7.2pt; font-weight: 600; letter-spacing: 0.3pt; color: var(--soft); text-align: center; }
+
+/* courses */
+.cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.4in; align-items: start; }
+.course h2 { font-family: "Young Serif", serif; font-weight: 400; font-size: 21pt; line-height: 1;
+             display: flex; align-items: center; gap: 10pt; margin-bottom: 10pt; }
+.course h2::after { content: ""; flex: 1; border-top: 1pt solid var(--ink); transform: translateY(2pt); }
+.dish { padding: 5.5pt 0 6pt; border-bottom: 0.6pt solid var(--rule); break-inside: avoid; }
+.dish:last-child { border-bottom: 0; }
+.p2 .dish { padding: 8pt 0 8.5pt; }
+.p2 .course h2 { margin-bottom: 8pt; }
+.line { display: flex; align-items: baseline; gap: 5pt; }
+.line h3 { font-size: 12pt; font-weight: 700; letter-spacing: 0.1pt; white-space: nowrap; }
+.tags { display: inline-flex; align-items: center; gap: 3pt; flex: 1; }
+.tag { font-size: 7pt; font-weight: 800; letter-spacing: 0.4pt; color: var(--ember); }
+.chili { width: 11pt; height: 11pt; color: var(--ember); transform: translateY(1.5pt); }
+.price { font-size: 12pt; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 18pt; text-align: right; }
+.desc { margin-top: 2pt; color: var(--soft); font-size: 9.5pt; padding-right: 8pt; }
+.meta { margin-top: 3.5pt; display: flex; flex-wrap: wrap; align-items: center; gap: 3pt; }
+.al { display: inline-block; font-size: 6.6pt; font-weight: 700; letter-spacing: 0.4pt; line-height: 1;
+       padding: 1.6pt 2.6pt 1.4pt; border: 0.7pt solid var(--ink); border-radius: 2pt; color: var(--ink); }
+.traces { font-size: 7.5pt; font-style: italic; color: var(--soft); margin-left: 3pt; }
+.free { font-size: 7.5pt; font-style: italic; color: var(--mute); }
+
+/* page 2 extras */
+.box { margin-top: 14pt; border: 0.8pt solid var(--ink); border-radius: 3pt; padding: 8pt 10pt 9pt; font-size: 8.6pt; color: var(--soft); }
+.box h4 { font-family: "Young Serif", serif; font-weight: 400; font-size: 13pt; color: var(--ink); margin-bottom: 3pt; }
+.info { display: grid; grid-template-columns: 1.25fr 0.85fr 1.1fr; gap: 0.2in; margin-top: auto; padding-top: 0.15in;
+         font-size: 8.4pt; color: var(--soft); line-height: 1.4; }
+.info b { display: block; color: var(--ink); font-weight: 700; text-transform: uppercase; letter-spacing: 1pt; font-size: 7pt; margin-bottom: 1pt; }
+
+/* footer */
+footer { margin-top: auto; border-top: 0.8pt solid var(--ink); padding-top: 6pt; }
+.info + footer { margin-top: 0.14in; }
+.legend { font-size: 7.3pt; color: var(--soft); }
+.lg-row { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6.5pt; row-gap: 3pt; }
+.lg-row + .lg-row { margin-top: 3pt; }
+.lg-row > b { color: var(--ink); font-weight: 700; text-transform: uppercase; letter-spacing: 1pt; font-size: 6.8pt; width: 50pt; }
+.lg { display: inline-flex; align-items: center; gap: 2.5pt; white-space: nowrap; }
+.lg.note { font-style: italic; margin-left: auto; }
+.ding { display: flex; align-items: center; justify-content: center; gap: 6pt; margin-top: 7pt; padding-top: 6pt;
+         border-top: 0.6pt solid var(--rule); font-size: 8.6pt; color: var(--ink); }
+.ding .btn { width: 12pt; height: 12pt; color: var(--ember); flex: none; }
+</style>
+</head>
+<body>
+
+    <div class="page">
+      <header class="mast">
+        <p class="kicker">Pan-Asian street kitchen &amp; charcoal grill</p>
+        <h1>Ginger <em class="amp">&amp;</em> Coal</h1>
+        <p class="sub">All prices in US dollars &middot; Mon&ndash;Thu 11:30&ndash;22:00 &middot; Fri&ndash;Sat 11:30&ndash;23:00 &middot; Sun 12:00&ndash;21:00</p>
+      </header>
+      <div class="strip"><figure><img src="photos/rainbow-summer-rolls.jpg" alt="Rainbow Summer Rolls"><figcaption>Rainbow Summer Rolls</figcaption></figure><figure><img src="photos/chicken-satay-skewers.jpg" alt="Chicken Satay Skewers"><figcaption>Chicken Satay Skewers</figcaption></figure><figure><img src="photos/chili-garlic-prawns.jpg" alt="Chili Garlic Prawns"><figcaption>Chili Garlic Prawns</figcaption></figure><figure><img src="photos/pad-thai-with-shrimp.jpg" alt="Pad Thai with Shrimp"><figcaption>Pad Thai with Shrimp</figcaption></figure><figure><img src="photos/spicy-miso-ramen.jpg" alt="Spicy Miso Ramen"><figcaption>Spicy Miso Ramen</figcaption></figure></div>
+      <div class="cols">
+        <section class="course"><h2><span>Starters</span></h2>
+      <article class="dish">
+        <div class="line"><h3>Rainbow Summer Rolls</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span></span><span class="price">10</span></div>
+        <p class="desc">Rice paper rolls with mango, crisp vegetables, rice noodles and fresh herbs, with a ginger-lime dip.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Chicken Satay Skewers</h3><span class="tags"><span class="tag">GF</span></span><span class="price">13</span></div>
+        <p class="desc">Charcoal-grilled lemongrass chicken with a rich peanut sauce and cucumber relish.</p>
+        <div class="meta"><span class="al">PN</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Mushroom Gyoza</h3><span class="tags"><span class="tag">VG</span></span><span class="price">11</span></div>
+        <p class="desc">Six pan-fried dumplings filled with shiitake, cabbage and garlic chives, with a soy-vinegar dip.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">SO</span><span class="al">SE</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Chili Garlic Prawns</h3><span class="tags"><span class="tag">GF</span><svg class="chili" viewBox="0 0 24 24" aria-label="spicy"><path fill="currentColor" d="M14.6 8.1c2.9-.2 4.6 2.3 3.7 5.3-1.5 4.6-6.9 8-13.4 8.4-1.1.1-1.4-1.2-.5-1.6 4.3-2 7.2-5.4 8-9.4.3-1.6 1-2.6 2.2-2.7z"/><path fill="currentColor" d="M12.9 8.3c.6-1.6 2.5-2.4 4.3-1.8.9.3 1.5 1 1.6 1.9-1.6-1-3.9-1.1-5.9-.1z"/><path d="M15.9 6.6c.1-1.7 1-3.1 2.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="price">16</span></div>
+        <p class="desc">Tiger prawns wok-tossed with garlic, fresh red chili, spring onion and lime.</p>
+        <div class="meta"><span class="al">CR</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Crispy Tofu Bao</h3><span class="tags"><span class="tag">V</span></span><span class="price">12</span></div>
+        <p class="desc">Two steamed milk buns with crispy tofu, hoisin glaze, sriracha mayo and pickled cucumber.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">EG</span><span class="al">SO</span><span class="al">MI</span><span class="al">SE</span><span class="traces">may contain CR</span></div>
+      </article></section>
+        <section class="course"><h2><span>Mains</span></h2>
+      <article class="dish">
+        <div class="line"><h3>Pad Thai with Shrimp</h3><span class="tags"><span class="tag">GF</span></span><span class="price">19</span></div>
+        <p class="desc">Wok-fried rice noodles with shrimp, egg, tofu, bean sprouts and tamarind, topped with crushed peanuts.</p>
+        <div class="meta"><span class="al">CR</span><span class="al">EG</span><span class="al">FI</span><span class="al">PN</span><span class="al">SO</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Spicy Miso Ramen</h3><span class="tags"><svg class="chili" viewBox="0 0 24 24" aria-label="spicy"><path fill="currentColor" d="M14.6 8.1c2.9-.2 4.6 2.3 3.7 5.3-1.5 4.6-6.9 8-13.4 8.4-1.1.1-1.4-1.2-.5-1.6 4.3-2 7.2-5.4 8-9.4.3-1.6 1-2.6 2.2-2.7z"/><path fill="currentColor" d="M12.9 8.3c.6-1.6 2.5-2.4 4.3-1.8.9.3 1.5 1 1.6 1.9-1.6-1-3.9-1.1-5.9-.1z"/><path d="M15.9 6.6c.1-1.7 1-3.1 2.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="price">18</span></div>
+        <p class="desc">Pork and miso broth with chili oil, wheat noodles, chashu pork, a soft egg, corn and spring onion.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">EG</span><span class="al">SO</span><span class="al">SE</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Miso-Glazed Salmon</h3><span class="tags"><span class="tag">GF</span></span><span class="price">26</span></div>
+        <p class="desc">Roasted salmon with a sweet white-miso glaze, bok choy, jasmine rice and toasted sesame.</p>
+        <div class="meta"><span class="al">FI</span><span class="al">SO</span><span class="al">SE</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Cashew Chicken</h3><span class="tags"></span><span class="price">19</span></div>
+        <p class="desc">Wok-tossed chicken with roasted cashews, peppers and oyster sauce, served with jasmine rice.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">SO</span><span class="al">TN</span><span class="al">MO</span><span class="traces">may contain PN</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Korean BBQ Beef Bowl</h3><span class="tags"></span><span class="price">22</span></div>
+        <p class="desc">Grilled ribeye marinated in soy and pear over rice, with a fried egg, pickles and sesame.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">EG</span><span class="al">SO</span><span class="al">SE</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Green Vegetable Curry</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span><svg class="chili" viewBox="0 0 24 24" aria-label="spicy"><path fill="currentColor" d="M14.6 8.1c2.9-.2 4.6 2.3 3.7 5.3-1.5 4.6-6.9 8-13.4 8.4-1.1.1-1.4-1.2-.5-1.6 4.3-2 7.2-5.4 8-9.4.3-1.6 1-2.6 2.2-2.7z"/><path fill="currentColor" d="M12.9 8.3c.6-1.6 2.5-2.4 4.3-1.8.9.3 1.5 1 1.6 1.9-1.6-1-3.9-1.1-5.9-.1z"/><path d="M15.9 6.6c.1-1.7 1-3.1 2.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="price">17</span></div>
+        <p class="desc">Thai green curry of eggplant, pumpkin, green beans and basil in coconut milk, with jasmine rice. No fish sauce.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article></section>
+      </div>
+      <footer>
+      <div class="legend">
+        <div class="lg-row"><b>Allergens</b> <span class="lg"><span class="al">GL</span>Gluten</span> <span class="lg"><span class="al">CR</span>Crustaceans</span> <span class="lg"><span class="al">EG</span>Eggs</span> <span class="lg"><span class="al">FI</span>Fish</span> <span class="lg"><span class="al">PN</span>Peanuts</span> <span class="lg"><span class="al">SO</span>Soy</span> <span class="lg"><span class="al">MI</span>Milk</span> <span class="lg"><span class="al">TN</span>Tree nuts</span> <span class="lg"><span class="al">SE</span>Sesame</span> <span class="lg"><span class="al">MO</span>Molluscs</span></div>
+        <div class="lg-row"><b>Diet</b> <span class="lg"><span class="tag">VG</span>Vegan</span> <span class="lg"><span class="tag">V</span>Vegetarian</span> <span class="lg"><span class="tag">GF</span>Gluten-free</span> <span class="lg"><svg class="chili" viewBox="0 0 24 24" aria-label="spicy"><path fill="currentColor" d="M14.6 8.1c2.9-.2 4.6 2.3 3.7 5.3-1.5 4.6-6.9 8-13.4 8.4-1.1.1-1.4-1.2-.5-1.6 4.3-2 7.2-5.4 8-9.4.3-1.6 1-2.6 2.2-2.7z"/><path fill="currentColor" d="M12.9 8.3c.6-1.6 2.5-2.4 4.3-1.8.9.3 1.5 1 1.6 1.9-1.6-1-3.9-1.1-5.9-.1z"/><path d="M15.9 6.6c.1-1.7 1-3.1 2.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Spicy</span> <span class="lg note">&ldquo;may contain&rdquo; = possible traces</span></div>
+      </div><div class="ding"><svg class="btn" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="5.6" fill="currentColor"/></svg><span>Press the <b>Ding</b> button on your table and order in your own language &mdash; our AI waiter will check your allergies with you.</span></div></footer>
+    </div>
+
+    <div class="page p2">
+      <header class="mast small">
+        <h1>Ginger <em class="amp">&amp;</em> Coal</h1>
+        <p class="kicker">Sweets &amp; drinks &middot; everything here is alcohol-free</p>
+      </header>
+      <div class="strip"><figure><img src="photos/mango-sticky-rice.jpg" alt="Mango Sticky Rice"><figcaption>Mango Sticky Rice</figcaption></figure><figure><img src="photos/matcha-tiramisu.jpg" alt="Matcha Tiramisu"><figcaption>Matcha Tiramisu</figcaption></figure><figure><img src="photos/black-sesame-ice-cream.jpg" alt="Black Sesame Ice Cream"><figcaption>Black Sesame Ice Cream</figcaption></figure><figure><img src="photos/thai-iced-tea.jpg" alt="Thai Iced Tea"><figcaption>Thai Iced Tea</figcaption></figure><figure><img src="photos/lychee-mint-spritz.jpg" alt="Lychee Mint Spritz"><figcaption>Lychee Mint Spritz</figcaption></figure></div>
+      <div class="cols">
+        <section class="course"><h2><span>Desserts</span></h2>
+      <article class="dish">
+        <div class="line"><h3>Mango Sticky Rice</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span></span><span class="price">9</span></div>
+        <p class="desc">Warm coconut sticky rice with ripe mango and salted coconut cream.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Matcha Tiramisu</h3><span class="tags"><span class="tag">V</span></span><span class="price">10</span></div>
+        <p class="desc">Ladyfingers soaked in matcha, layered with mascarpone cream and dusted with green tea.</p>
+        <div class="meta"><span class="al">GL</span><span class="al">EG</span><span class="al">MI</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Black Sesame Ice Cream</h3><span class="tags"><span class="tag">V</span><span class="tag">GF</span></span><span class="price">8</span></div>
+        <p class="desc">Two scoops of toasted black sesame ice cream with crunchy almond brittle.</p>
+        <div class="meta"><span class="al">EG</span><span class="al">MI</span><span class="al">TN</span><span class="al">SE</span><span class="traces">may contain PN</span></div>
+      </article>
+        <div class="box">
+          <h4>Food allergies?</h4>
+          <p>Every dish shows the allergens it contains. Our kitchen handles peanuts, tree nuts, sesame,
+          soy, gluten, milk, eggs, fish, shellfish and molluscs. We do not remove allergens from a dish on
+          request, so please choose a dish that is free from yours. The tofu for the bao is fried in a
+          fryer shared with shellfish. With a severe allergy, please also speak to the manager on duty.</p>
+        </div></section>
+        <section class="course"><h2><span>Drinks</span></h2>
+      <article class="dish">
+        <div class="line"><h3>Lemongrass Ginger Lemonade</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span></span><span class="price">6</span></div>
+        <p class="desc">House-squeezed lemonade with lemongrass, fresh ginger and soda.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Lychee Mint Spritz</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span></span><span class="price">7</span></div>
+        <p class="desc">Alcohol-free spritz of lychee, fresh mint and lime, topped with sparkling water.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Thai Iced Tea</h3><span class="tags"><span class="tag">V</span><span class="tag">GF</span></span><span class="price">6</span></div>
+        <p class="desc">Spiced Thai black tea over ice with sweetened condensed milk.</p>
+        <div class="meta"><span class="al">MI</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Vietnamese Iced Coffee</h3><span class="tags"><span class="tag">V</span><span class="tag">GF</span></span><span class="price">6</span></div>
+        <p class="desc">Slow-drip dark-roast coffee over ice with sweetened condensed milk.</p>
+        <div class="meta"><span class="al">MI</span></div>
+      </article>
+      <article class="dish">
+        <div class="line"><h3>Jasmine Green Tea</h3><span class="tags"><span class="tag">VG</span><span class="tag">GF</span></span><span class="price">4</span></div>
+        <p class="desc">A pot of fragrant hot jasmine green tea.</p>
+        <div class="meta"><span class="free">no major allergens</span></div>
+      </article></section>
+      </div>
+      <div class="info">
+        <p><b>Hours</b> Mon&ndash;Thu 11:30&ndash;22:00 &middot; Fri&ndash;Sat 11:30&ndash;23:00<br>Sun 12:00&ndash;21:00 &middot; last orders 30 min before closing</p>
+        <p><b>Wi-Fi</b> GingerCoal-Guest<br>Password: charcoal2026</p>
+        <p><b>Paying</b> Cards, Apple Pay, Google Pay, cash<br>Split bills welcome &middot; service not included</p>
+      </div>
+      <footer>
+      <div class="legend">
+        <div class="lg-row"><b>Allergens</b> <span class="lg"><span class="al">GL</span>Gluten</span> <span class="lg"><span class="al">CR</span>Crustaceans</span> <span class="lg"><span class="al">EG</span>Eggs</span> <span class="lg"><span class="al">FI</span>Fish</span> <span class="lg"><span class="al">PN</span>Peanuts</span> <span class="lg"><span class="al">SO</span>Soy</span> <span class="lg"><span class="al">MI</span>Milk</span> <span class="lg"><span class="al">TN</span>Tree nuts</span> <span class="lg"><span class="al">SE</span>Sesame</span> <span class="lg"><span class="al">MO</span>Molluscs</span></div>
+        <div class="lg-row"><b>Diet</b> <span class="lg"><span class="tag">VG</span>Vegan</span> <span class="lg"><span class="tag">V</span>Vegetarian</span> <span class="lg"><span class="tag">GF</span>Gluten-free</span> <span class="lg"><svg class="chili" viewBox="0 0 24 24" aria-label="spicy"><path fill="currentColor" d="M14.6 8.1c2.9-.2 4.6 2.3 3.7 5.3-1.5 4.6-6.9 8-13.4 8.4-1.1.1-1.4-1.2-.5-1.6 4.3-2 7.2-5.4 8-9.4.3-1.6 1-2.6 2.2-2.7z"/><path fill="currentColor" d="M12.9 8.3c.6-1.6 2.5-2.4 4.3-1.8.9.3 1.5 1 1.6 1.9-1.6-1-3.9-1.1-5.9-.1z"/><path d="M15.9 6.6c.1-1.7 1-3.1 2.6-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Spicy</span> <span class="lg note">&ldquo;may contain&rdquo; = possible traces</span></div>
+      </div><div class="ding"><svg class="btn" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="5.6" fill="currentColor"/></svg><span>Press the <b>Ding</b> button on your table and order in your own language &mdash; our AI waiter will check your allergies with you.</span></div></footer>
+    </div>
+</body>
+</html>

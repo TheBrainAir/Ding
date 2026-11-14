@@ -1,0 +1,144 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/unbounded";
+@import "@fontsource-variable/figtree";
+
+/*
+ * Ding palette — a brasserie at dinner time.
+ *   linen    #F6F0E6  tablecloth: the page
+ *   paper    #FFFDF8  order pad: surfaces
+ *   bistro   #1E4636  awning green: brand, primary actions, ink
+ *   saffron  #F2A93B  the call button: highlight, never body text
+ *   paprika  #C8322B  allergy, and only allergy
+ */
+:root {
+  --linen: #f6f0e6;
+  --linen-deep: #ede3d2;
+  --paper: #fffdf8;
+  --bistro: #1e4636;
+  --bistro-deep: #133024;
+  --bistro-night: #0e251b;
+  --ink: #17362a;
+  --ink-soft: #5c6b61;
+  --saffron: #f2a93b;
+  --saffron-deep: #d98a16;
+  --saffron-soft: #fce9c6;
+  --line: #e3d9c8;
+  --paprika: #c8322b;
+  --paprika-deep: #a3241e;
+  --paprika-soft: #fbe4df;
+  --sage-soft: #dfe9e1;
+
+  --radius: 0.875rem;
+  --background: var(--linen);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--bistro);
+  --primary-foreground: var(--paper);
+  --secondary: var(--linen-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--linen-deep);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--linen-deep);
+  --accent-foreground: var(--ink);
+  --destructive: var(--paprika);
+  --border: var(--line);
+  --input: #d8cab3;
+  --ring: var(--saffron-deep);
+}
+
+@theme inline {
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+  --font-display: "Unbounded Variable", "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-linen: var(--linen);
+  --color-linen-deep: var(--linen-deep);
+  --color-paper: var(--paper);
+  --color-bistro: var(--bistro);
+  --color-bistro-deep: var(--bistro-deep);
+  --color-bistro-night: var(--bistro-night);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-saffron: var(--saffron);
+  --color-saffron-deep: var(--saffron-deep);
+  --color-saffron-soft: var(--saffron-soft);
+  --color-line: var(--line);
+  --color-paprika: var(--paprika);
+  --color-paprika-deep: var(--paprika-deep);
+  --color-paprika-soft: var(--paprika-soft);
+  --color-sage-soft: var(--sage-soft);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "tnum" 0;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: var(--saffron-soft);
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Kitchen tickets: rounded top, torn zig-zag bottom like a printed order slip. */
+.ticket {
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,27 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# runtime data
+backend/data/
+*.db
+*.db-shm
+*.db-wal
+
+# misc
+.DS_Store
+*.log

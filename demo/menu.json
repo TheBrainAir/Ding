@@ -1,0 +1,244 @@
+{
+  "restaurant": {
+    "name": "Ginger & Coal",
+    "tagline": "Pan-Asian street kitchen & charcoal grill",
+    "currency": "USD"
+  },
+  "dishes": [
+    {
+      "name": "Rainbow Summer Rolls",
+      "description": "Rice paper rolls with mango, crisp vegetables, rice noodles and fresh herbs, with a ginger-lime dip.",
+      "category": "Starters",
+      "price": 10,
+      "ingredients": ["rice paper", "rice vermicelli", "mango", "cucumber", "carrot", "red cabbage", "lettuce", "mint", "thai basil", "lime juice", "fresh ginger", "garlic", "red chili", "cane sugar"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free"],
+      "photo": "photos/rainbow-summer-rolls.jpg"
+    },
+    {
+      "name": "Chicken Satay Skewers",
+      "description": "Charcoal-grilled lemongrass chicken with a rich peanut sauce and cucumber relish.",
+      "category": "Starters",
+      "price": 13,
+      "ingredients": ["chicken thigh", "lemongrass", "turmeric", "garlic", "coriander seed", "coconut milk", "palm sugar", "roasted peanuts", "tamarind", "red chili", "lime", "cucumber", "shallot", "rice vinegar"],
+      "allergens": ["peanuts"],
+      "may_contain": [],
+      "dietary_tags": ["gluten_free"],
+      "photo": "photos/chicken-satay-skewers.jpg"
+    },
+    {
+      "name": "Mushroom Gyoza",
+      "description": "Six pan-fried dumplings filled with shiitake, cabbage and garlic chives, with a soy-vinegar dip.",
+      "category": "Starters",
+      "price": 11,
+      "ingredients": ["wheat flour dumpling wrappers", "shiitake mushrooms", "napa cabbage", "garlic chives", "fresh ginger", "garlic", "soy sauce", "sesame oil", "rice vinegar"],
+      "allergens": ["gluten", "soy", "sesame"],
+      "may_contain": [],
+      "dietary_tags": ["vegan"],
+      "photo": "photos/mushroom-gyoza.jpg"
+    },
+    {
+      "name": "Chili Garlic Prawns",
+      "description": "Tiger prawns wok-tossed with garlic, fresh red chili, spring onion and lime.",
+      "category": "Starters",
+      "price": 16,
+      "ingredients": ["tiger prawns", "garlic", "red chili", "spring onion", "cilantro", "lime", "rice bran oil", "sea salt"],
+      "allergens": ["crustaceans"],
+      "may_contain": [],
+      "dietary_tags": ["gluten_free", "spicy"],
+      "photo": "photos/chili-garlic-prawns.jpg"
+    },
+    {
+      "name": "Crispy Tofu Bao",
+      "description": "Two steamed milk buns with crispy tofu, hoisin glaze, sriracha mayo and pickled cucumber.",
+      "category": "Starters",
+      "price": 12,
+      "ingredients": ["steamed bao buns (wheat flour, milk)", "tofu", "cornstarch", "hoisin sauce (soybeans, wheat, sesame)", "sriracha mayo (egg yolk, rice vinegar, sriracha)", "pickled cucumber", "cilantro"],
+      "allergens": ["gluten", "eggs", "soy", "milk", "sesame"],
+      "may_contain": ["crustaceans"],
+      "dietary_tags": ["vegetarian"],
+      "photo": "photos/crispy-tofu-bao.jpg"
+    },
+    {
+      "name": "Pad Thai with Shrimp",
+      "description": "Wok-fried rice noodles with shrimp, egg, tofu, bean sprouts and tamarind, topped with crushed peanuts.",
+      "category": "Mains",
+      "price": 19,
+      "ingredients": ["rice noodles", "shrimp", "egg", "firm tofu", "bean sprouts", "garlic chives", "shallot", "tamarind", "fish sauce", "palm sugar", "crushed roasted peanuts", "chili flakes", "lime"],
+      "allergens": ["crustaceans", "eggs", "fish", "peanuts", "soy"],
+      "may_contain": [],
+      "dietary_tags": ["gluten_free"],
+      "photo": "photos/pad-thai-with-shrimp.jpg"
+    },
+    {
+      "name": "Spicy Miso Ramen",
+      "description": "Pork and miso broth with chili oil, wheat noodles, chashu pork, a soft egg, corn and spring onion.",
+      "category": "Mains",
+      "price": 18,
+      "ingredients": ["wheat ramen noodles", "pork bone broth", "white miso", "chili oil", "chashu pork belly", "soy sauce", "soft-boiled egg", "sweetcorn", "bean sprouts", "spring onion", "garlic", "sesame oil", "toasted sesame seeds"],
+      "allergens": ["gluten", "eggs", "soy", "sesame"],
+      "may_contain": [],
+      "dietary_tags": ["spicy"],
+      "photo": "photos/spicy-miso-ramen.jpg"
+    },
+    {
+      "name": "Miso-Glazed Salmon",
+      "description": "Roasted salmon with a sweet white-miso glaze, bok choy, jasmine rice and toasted sesame.",
+      "category": "Mains",
+      "price": 26,
+      "ingredients": ["salmon fillet", "white miso (rice-based)", "mirin", "honey", "fresh ginger", "baby bok choy", "jasmine rice", "toasted sesame seeds", "spring onion"],
+      "allergens": ["fish", "soy", "sesame"],
+      "may_contain": [],
+      "dietary_tags": ["gluten_free"],
+      "photo": "photos/miso-glazed-salmon.jpg"
+    },
+    {
+      "name": "Cashew Chicken",
+      "description": "Wok-tossed chicken with roasted cashews, peppers and oyster sauce, served with jasmine rice.",
+      "category": "Mains",
+      "price": 19,
+      "ingredients": ["chicken breast", "roasted cashews", "red bell pepper", "onion", "spring onion", "dried red chilies", "garlic", "oyster sauce (oyster extract, wheat, soy)", "soy sauce", "jasmine rice"],
+      "allergens": ["gluten", "soy", "tree_nuts", "molluscs"],
+      "may_contain": ["peanuts"],
+      "dietary_tags": [],
+      "photo": "photos/cashew-chicken.jpg"
+    },
+    {
+      "name": "Korean BBQ Beef Bowl",
+      "description": "Grilled ribeye marinated in soy and pear over rice, with a fried egg, pickles and sesame.",
+      "category": "Mains",
+      "price": 22,
+      "ingredients": ["ribeye beef", "soy sauce", "asian pear", "garlic", "fresh ginger", "sesame oil", "jasmine rice", "fried egg", "pickled cucumber", "pickled carrot", "spring onion", "toasted sesame seeds"],
+      "allergens": ["gluten", "eggs", "soy", "sesame"],
+      "may_contain": [],
+      "dietary_tags": [],
+      "photo": "photos/korean-bbq-beef-bowl.jpg"
+    },
+    {
+      "name": "Green Vegetable Curry",
+      "description": "Thai green curry of eggplant, pumpkin, green beans and basil in coconut milk, with jasmine rice. No fish sauce.",
+      "category": "Mains",
+      "price": 17,
+      "ingredients": ["green curry paste (green chili, lemongrass, galangal, garlic, shallot, kaffir lime, coriander root, cumin)", "coconut milk", "thai eggplant", "pumpkin", "green beans", "bamboo shoots", "thai basil", "jasmine rice"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free", "spicy"],
+      "photo": "photos/green-vegetable-curry.jpg"
+    },
+    {
+      "name": "Mango Sticky Rice",
+      "description": "Warm coconut sticky rice with ripe mango and salted coconut cream.",
+      "category": "Desserts",
+      "price": 9,
+      "ingredients": ["glutinous rice", "ripe mango", "coconut milk", "coconut cream", "cane sugar", "sea salt"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free"],
+      "photo": "photos/mango-sticky-rice.jpg"
+    },
+    {
+      "name": "Matcha Tiramisu",
+      "description": "Ladyfingers soaked in matcha, layered with mascarpone cream and dusted with green tea.",
+      "category": "Desserts",
+      "price": 10,
+      "ingredients": ["ladyfingers (wheat flour, eggs, sugar)", "mascarpone", "cream", "egg yolks", "sugar", "matcha green tea"],
+      "allergens": ["gluten", "eggs", "milk"],
+      "may_contain": [],
+      "dietary_tags": ["vegetarian"],
+      "photo": "photos/matcha-tiramisu.jpg"
+    },
+    {
+      "name": "Black Sesame Ice Cream",
+      "description": "Two scoops of toasted black sesame ice cream with crunchy almond brittle.",
+      "category": "Desserts",
+      "price": 8,
+      "ingredients": ["milk", "cream", "egg yolks", "cane sugar", "black sesame paste", "almond brittle (almonds, sugar, butter)"],
+      "allergens": ["eggs", "milk", "tree_nuts", "sesame"],
+      "may_contain": ["peanuts"],
+      "dietary_tags": ["vegetarian", "gluten_free"],
+      "photo": "photos/black-sesame-ice-cream.jpg"
+    },
+    {
+      "name": "Lemongrass Ginger Lemonade",
+      "description": "House-squeezed lemonade with lemongrass, fresh ginger and soda.",
+      "category": "Drinks",
+      "price": 6,
+      "ingredients": ["lemon juice", "lemongrass", "fresh ginger", "cane sugar", "sparkling water", "ice"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free"],
+      "photo": "photos/lemongrass-ginger-lemonade.jpg"
+    },
+    {
+      "name": "Lychee Mint Spritz",
+      "description": "Alcohol-free spritz of lychee, fresh mint and lime, topped with sparkling water.",
+      "category": "Drinks",
+      "price": 7,
+      "ingredients": ["lychee", "lychee syrup", "fresh mint", "lime juice", "sparkling water", "ice"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free"],
+      "photo": "photos/lychee-mint-spritz.jpg"
+    },
+    {
+      "name": "Thai Iced Tea",
+      "description": "Spiced Thai black tea over ice with sweetened condensed milk.",
+      "category": "Drinks",
+      "price": 6,
+      "ingredients": ["thai black tea", "star anise", "cane sugar", "sweetened condensed milk", "evaporated milk", "ice"],
+      "allergens": ["milk"],
+      "may_contain": [],
+      "dietary_tags": ["vegetarian", "gluten_free"],
+      "photo": "photos/thai-iced-tea.jpg"
+    },
+    {
+      "name": "Vietnamese Iced Coffee",
+      "description": "Slow-drip dark-roast coffee over ice with sweetened condensed milk.",
+      "category": "Drinks",
+      "price": 6,
+      "ingredients": ["dark-roast coffee", "sweetened condensed milk", "ice"],
+      "allergens": ["milk"],
+      "may_contain": [],
+      "dietary_tags": ["vegetarian", "gluten_free"],
+      "photo": "photos/vietnamese-iced-coffee.jpg"
+    },
+    {
+      "name": "Jasmine Green Tea",
+      "description": "A pot of fragrant hot jasmine green tea.",
+      "category": "Drinks",
+      "price": 4,
+      "ingredients": ["jasmine green tea", "hot water"],
+      "allergens": [],
+      "may_contain": [],
+      "dietary_tags": ["vegan", "gluten_free"],
+      "photo": "photos/jasmine-green-tea.jpg"
+    }
+  ],
+  "knowledge": [
+    {
+      "title": "Opening hours",
+      "content": "Monday to Thursday 11:30 to 22:00, Friday and Saturday 11:30 to 23:00, Sunday 12:00 to 21:00. The kitchen takes last orders 30 minutes before closing."
+    },
+    {
+      "title": "Wi-Fi",
+      "content": "The guest network is GingerCoal-Guest and the password is charcoal2026."
+    },
+    {
+      "title": "Payment and tipping",
+      "content": "We accept all major cards, Apple Pay, Google Pay and cash. Bills can be split by item or evenly. Service is not included and tipping is optional. To pay, ask for the bill and a server brings the card machine to the table."
+    },
+    {
+      "title": "Allergies and dish changes",
+      "content": "Our kitchen handles peanuts, tree nuts, sesame, soy, gluten, milk, eggs, fish, shellfish and molluscs. Allergen information on the menu is for each dish as written, and we do not remove allergens from a dish on request, so please choose a dish that is free from your allergen. The tofu for the Crispy Tofu Bao is fried in a shared fryer that is also used for shellfish, so it may contain traces of crustaceans. Guests with severe allergies should also speak to the manager on duty."
+    },
+    {
+      "title": "Today's special",
+      "content": "Chef's pick today is the Miso-Glazed Salmon, made with salmon delivered this morning. On weekdays from 15:00 to 18:00 every Lemongrass Ginger Lemonade and Lychee Mint Spritz is 2 dollars off."
+    },
+    {
+      "title": "Families, accessibility and parking",
+      "content": "High chairs are available and children are welcome; mild dishes that kids usually enjoy are the Mushroom Gyoza, the Korean BBQ Beef Bowl and the Mango Sticky Rice. The dining room and restroom are step-free. There is no private parking; the public garage on the next block offers two hours free with a validated receipt."
+    }
+  ]
+}
