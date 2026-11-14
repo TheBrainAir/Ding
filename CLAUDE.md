@@ -14,6 +14,7 @@ commit keys.
 | --- | --- | --- |
 | `backend/` | Python 3.12, uv, FastAPI, SQLAlchemy 2, SQLite | API on **:8010** (8000 is taken on the dev machine) |
 | `web/` | React 19, Vite, TS, Tailwind | :5173, proxies `/api` and `/media` to :8010 |
+| `bridge/` | Python 3.12, uv, sounddevice, pyserial | Headless mode (`ding-bridge --table <token>`): button + mic + speaker with no guest screen. Own uv project; talks to the backend only over HTTP. |
 | `firmware/table_button/` | Arduino | Button D2, LED D9, serial 115200 |
 | `docs/API.md` | | **The contract** between backend and web. Change it together with the code. |
 | `docs/HARDWARE.md` | | Button wiring and serial protocol |
@@ -29,7 +30,14 @@ uv run uvicorn app.main:app --reload --reload-dir app --port 8010
 uv run python scripts/seed_demo.py     # idempotent; demo/menu.json if present, else built-in menu
 uv run python scripts/voice_smoke.py   # real voice round trip, needs ELEVENLABS_API_KEY
 uv run ruff check app && uv run ruff format app
+cd ../bridge
+uv run ding-bridge --table <token> [--keyboard]   # headless mode; --list-devices / --list-ports
+uv run pytest && uv run ruff check src tests      # no hardware needed (fakes + a pty)
 ```
+
+The default guest setup is the browser guest screen (`/t/<token>`, Web Serial to the button). The
+bridge is the optional headless alternative; both use the same `POST /api/table/{token}/turn`
+stream and the same serial protocol. Don't run both for one table.
 
 SQLite file and uploaded photos: `backend/data/` (`ding.db`, `media/` served at `/media/...`).
 Schema is `create_all` on startup, no migrations: when you change a model on a dev machine, delete
@@ -67,6 +75,12 @@ beta `server-side-fallback-2026-07-01`, top-level `cache_control`. Check `stop_r
 stored on the session and replayed byte for byte. Never edit or drop earlier messages, never change
 a session's frozen `system_prompt`, never change tool definitions casually (it invalidates every
 open conversation). Per-turn state goes at the end of the user message in `<session_state>`.
+
+**Replies are written for the ear.** The guest hears the waiter (and may or may not see captions),
+so the prompt never refers to a screen and never recites lists: a few options, then a question.
+
+**SSE streams must end on shutdown.** `/api/events` checks `bus.shutting_down` (set by a signal hook
+chained in front of uvicorn's) every second; otherwise `--reload` and Ctrl+C hang on open dashboards.
 
 **Only final spoken text reaches the guest.** Text written next to a tool call is discarded, never
 sent as `text` events or to TTS.

@@ -5,7 +5,9 @@
 #   ./dev.sh backend    backend only (auto-reload)
 #   ./dev.sh web        web only
 #   ./dev.sh seed       create / refresh the demo restaurant (prints login + table URLs)
-#   ./dev.sh test       backend lint + tests
+#   ./dev.sh test       backend lint + tests (+ bridge tests)
+#   ./dev.sh bridge TOKEN [flags]   headless mode: the table button + mic + speaker without a
+#                       guest screen (e.g. --keyboard to test with Enter; see bridge --help)
 #
 # First run: put your keys in backend/.env (see backend/.env.example). The demo data
 # is seeded automatically when the database does not exist yet.
@@ -14,6 +16,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 BACKEND="$ROOT/backend"
 WEB="$ROOT/web"
+BRIDGE="$ROOT/bridge"
 PORT=8010
 
 need() {
@@ -35,7 +38,7 @@ prepare_backend() {
 
 run_backend() {
   cd "$BACKEND"
-  exec uv run uvicorn app.main:app --reload --reload-dir app --host 127.0.0.1 --port "$PORT"
+  exec uv run uvicorn app.main:app --reload --reload-dir app --host 127.0.0.1 --port "$PORT" --timeout-graceful-shutdown 2
 }
 
 prepare_web() {
@@ -65,7 +68,18 @@ case "${1:-all}" in
     ;;
   test)
     need uv "https://docs.astral.sh/uv/"
-    cd "$BACKEND" && uv run ruff check app && exec uv run pytest
+    (cd "$BACKEND" && uv run ruff check app && uv run pytest)
+    cd "$BRIDGE" && uv run ruff check src tests && exec uv run pytest
+    ;;
+  bridge)
+    need uv "https://docs.astral.sh/uv/"
+    if [ -z "${2:-}" ] || [ "${2#-}" != "$2" ]; then
+      echo "usage: ./dev.sh bridge TOKEN [ding-bridge flags]   (Dashboard > Tables shows the token)" >&2
+      exit 1
+    fi
+    token="$2"
+    shift 2
+    cd "$BRIDGE" && exec uv run ding-bridge --table "$token" "$@"
     ;;
   all)
     prepare_backend
@@ -88,7 +102,7 @@ case "${1:-all}" in
     wait 2>/dev/null || true
     ;;
   *)
-    sed -n '2,10p' "$0"
+    sed -n '2,13p' "$0"
     exit 1
     ;;
 esac

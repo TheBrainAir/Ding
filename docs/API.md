@@ -168,6 +168,10 @@ Body: raw `audio/wav`. Response: one `audio/mpeg` body (the whole reply), with h
 - Arduino → browser: `PRESS`, `RELEASE`
 - Browser → Arduino: `STATE:idle` | `STATE:listening` | `STATE:thinking` | `STATE:speaking`
 
+The headless bridge (`bridge/`, `ding-bridge --table <token>`) speaks the same protocol over plain
+USB serial (or a Bluetooth serial port) in place of the browser. It also sends `STATE:...` again
+after the board prints `READY` or is re-plugged.
+
 ## Backend implementation notes
 
 Additions and clarifications; none of them change the shapes above.

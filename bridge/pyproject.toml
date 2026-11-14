@@ -1,0 +1,40 @@
+[project]
+name = "ding-bridge"
+version = "0.1.0"
+description = "Ding table-button bridge: serial button + microphone + speaker, talking to the Ding backend"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "miniaudio>=1.73",
+    "numpy>=2.4.4",
+    "pyserial>=3.5",
+    "sounddevice>=0.5.6",
+]
+
+[project.scripts]
+ding-bridge = "ding_bridge.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.26,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "ruff>=0.17.5",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003", "RUF005"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+faulthandler_timeout = 60

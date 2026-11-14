@@ -13,6 +13,7 @@ from app.models import Restaurant
 router = APIRouter(tags=["events"])
 
 PING_SECONDS = 15
+CHECK_SECONDS = 1.0  # how quickly a stream notices a disconnect or a server shutdown
 
 
 @router.get("/events")
@@ -23,14 +24,19 @@ async def events(request: Request, r: Restaurant = Depends(current_restaurant)) 
     async def stream():
         try:
             yield ": connected\n\n"
-            while True:
+            quiet = 0.0
+            while not bus.shutting_down:
                 if await request.is_disconnected():
                     break
                 try:
-                    name, data = await asyncio.wait_for(queue.get(), timeout=PING_SECONDS)
+                    name, data = await asyncio.wait_for(queue.get(), timeout=CHECK_SECONDS)
                 except TimeoutError:
-                    yield ": ping\n\n"
+                    quiet += CHECK_SECONDS
+                    if quiet >= PING_SECONDS:
+                        quiet = 0.0
+                        yield ": ping\n\n"
                     continue
+                quiet = 0.0
                 yield f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
         finally:
             bus.unsubscribe(restaurant_id, queue)

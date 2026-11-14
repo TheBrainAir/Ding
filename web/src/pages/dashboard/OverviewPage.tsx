@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { BellRing, ChefHat, QrCode } from 'lucide-react'
+import { Armchair, BellRing, ChefHat } from 'lucide-react'
 import { api } from '@/api/client'
 import { keys, useMe } from '@/api/queries'
 import type { Stats } from '@/api/types'
@@ -85,8 +85,8 @@ export function OverviewPage() {
             </Button>
             <Button asChild variant="outline" className="justify-start">
               <Link to="/dashboard/tables">
-                <QrCode aria-hidden />
-                Tables and QR codes
+                <Armchair aria-hidden />
+                Tables and table screens
               </Link>
             </Button>
           </div>

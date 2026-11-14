@@ -33,7 +33,8 @@ Other commands:
 ./dev.sh seed       # create / refresh the demo restaurant (safe to re-run)
 ./dev.sh backend    # backend only
 ./dev.sh web        # web only
-./dev.sh test       # backend lint + tests
+./dev.sh test       # backend + bridge lint and tests
+./dev.sh bridge <token> [--keyboard]   # headless mode, see Hardware below
 ```
 
 **Without an ElevenLabs key** everything still works in text mode: the table screen and the
@@ -76,6 +77,7 @@ tag, and other food words ("pork", "mushrooms") are matched against ingredients.
 | --- | --- |
 | `backend/` | FastAPI + SQLAlchemy + SQLite API, the waiter agent, speech, RAG (Python 3.12, uv) |
 | `web/` | React dashboard and table screen (Vite, TypeScript, Tailwind) |
+| `bridge/` | Headless mode: `ding-bridge` drives the button box, mic and speaker without a screen (Python, uv) |
 | `firmware/table_button/` | Arduino Uno sketch for the table button |
 | `docs/API.md` | API contract between backend and web |
 | `docs/HARDWARE.md` | Wiring and the button's serial protocol |
@@ -86,6 +88,14 @@ Settings such as the LLM, STT and TTS model ids and the voice live on the restau
 
 ## Hardware
 
-The Arduino is only the button and a status light, connected to the laptop over USB (Web Serial).
-The microphone and speaker plug into the laptop. Without the board, press the space bar or click
-the button on screen. See [docs/HARDWARE.md](docs/HARDWARE.md).
+The default setup is the **guest screen plus the button**: `/t/<token>` in Chrome on the table's
+laptop records, plays the reply and shows captions, and the Arduino in the button box (button and
+status light only) talks to it over USB with Web Serial. The microphone and speaker plug into the
+laptop. Without the board, press the space bar or click the button on screen.
+
+**Headless mode** is for a box with no screen: `./dev.sh bridge <token>` runs the bridge, which
+reads the button, records, plays the reply and gives audio cues instead of visuals. It can run on a
+different machine from the backend (`--server`).
+
+Wiring, the serial protocol, headless mode and battery (Bluetooth) options:
+[docs/HARDWARE.md](docs/HARDWARE.md).

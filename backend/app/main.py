@@ -50,6 +50,7 @@ async def _reaper() -> None:
 async def lifespan(_app: FastAPI):
     init_db()
     bus.bind_loop(asyncio.get_running_loop())
+    bus.install_shutdown_hook()  # lets open SSE streams close when the server stops or reloads
     # Load the embedding model (and rebuild the index if the model changed) before serving.
     await asyncio.to_thread(rag.warmup)
     if not settings.anthropic_api_key.strip():
@@ -58,6 +59,7 @@ async def lifespan(_app: FastAPI):
         log.warning("ELEVENLABS_API_KEY is not set: running in text mode (no speech in or out)")
     reaper = asyncio.create_task(_reaper())
     yield
+    bus.shutting_down = True
     reaper.cancel()
     with contextlib.suppress(asyncio.CancelledError):
         await reaper

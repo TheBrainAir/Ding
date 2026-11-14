@@ -2,13 +2,13 @@ import { useCallback, useEffect } from 'react'
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Armchair,
   BookOpen,
   ChefHat,
   LayoutGrid,
   Loader2,
   LogOut,
   MessagesSquare,
-  QrCode,
   Settings,
   UtensilsCrossed,
 } from 'lucide-react'
@@ -25,7 +25,7 @@ const NAV = [
   { to: '/dashboard', label: 'Overview', icon: LayoutGrid, end: true },
   { to: '/dashboard/orders', label: 'Orders', icon: ChefHat },
   { to: '/dashboard/menu', label: 'Menu', icon: UtensilsCrossed },
-  { to: '/dashboard/tables', label: 'Tables', icon: QrCode },
+  { to: '/dashboard/tables', label: 'Tables', icon: Armchair },
   { to: '/dashboard/conversations', label: 'Conversations', icon: MessagesSquare },
   { to: '/dashboard/knowledge', label: 'Knowledge', icon: BookOpen },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },

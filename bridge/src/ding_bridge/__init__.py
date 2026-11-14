@@ -1,0 +1,1 @@
+"""Ding table-button bridge."""
