@@ -64,6 +64,7 @@ reference or for the raw-GPIO fallback):
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Seeed XIAO ESP32-C3 (`XIAO_ESP32C3`) | 2 | 3 | 4 | 5 | 6 | 7 | 20 | D0 (GPIO2, harmless: the LCD only listens) |
 | Seeed XIAO ESP32-S3 (`XIAO_ESP32S3`) | 1 | 2 | 3 | 4 | 5 | 6 | 44 | D2 (GPIO3, harmless) |
+| Seeed XIAO ESP32-C6 (`XIAO_ESP32C6`): the board in the demo box | 0 | 1 | 2 | 21 | 22 | 23 | 17 | none |
 | Arduino Nano ESP32 (`nano_nora`) | D0..D7 as printed (the core maps them) | | | | | | | D0/D1 are also UART RX/TX: boot messages flicker the LCD before it starts, harmless |
 
 If your board package does not define `D0`..`D7` (compile error `'D0' was not declared in this

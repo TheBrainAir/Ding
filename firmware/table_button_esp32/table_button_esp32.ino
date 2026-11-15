@@ -20,6 +20,7 @@
 // define D0..D7 ("'D0' was not declared in this scope"), set DING_USE_RAW_GPIO to 1 and put
 // the GPIO numbers from your board's pinout below. Example, Seeed XIAO ESP32-C3:
 // D0=2 D1=3 D2=4 D3=5 D4=6 D5=7 D7=20. Seeed XIAO ESP32-S3: D0=1 D1=2 D2=3 D3=4 D4=5 D5=6 D7=44.
+// Seeed XIAO ESP32-C6 (the demo box): D0=0 D1=1 D2=2 D3=21 D4=22 D5=23 D7=17.
 #ifndef DING_USE_RAW_GPIO
 #define DING_USE_RAW_GPIO 0
 #endif
