@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -211,3 +211,21 @@ class AppMeta(Base):
 
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[str] = mapped_column(Text, default="")
+
+
+class DishTranslation(Base):
+    """A dish's name and description in a guest language, cached. Valid while `source_hash`
+    matches the dish's current name + description (editing the dish invalidates it)."""
+
+    __tablename__ = "dish_translations"
+    __table_args__ = (UniqueConstraint("dish_id", "language", name="uq_dish_translation"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    dish_id: Mapped[int] = mapped_column(ForeignKey("dishes.id", ondelete="CASCADE"), index=True)
+    restaurant_id: Mapped[int] = mapped_column(Integer, index=True)
+    language: Mapped[str] = mapped_column(String(16), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    source_hash: Mapped[str] = mapped_column(String(40))
+    embedding: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)  # unused for now
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

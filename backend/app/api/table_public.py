@@ -15,8 +15,8 @@ from app.db import get_db
 from app.events import bus
 from app.models import DiningTable, Restaurant
 from app.schemas import TurnIn
-from app.serializers import allergies_out, latest_order, order_out, session_summary_out
-from app.services import guest_sessions, turns
+from app.serializers import allergies_out, guest_order_out, latest_order, session_summary_out
+from app.services import guest_sessions, translate, turns
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["table"])
@@ -43,7 +43,7 @@ def table_info(token: str, db: Session = Depends(get_db)) -> dict:
             "id": s.id,
             "language": s.language,
             "allergies": allergies_out(s),
-            "order": order_out(order) if order else None,
+            "order": guest_order_out(order, translate.cached(db, r.id, s.language)) if order else None,
             "transcript": list(s.transcript or []),
         }
     return {

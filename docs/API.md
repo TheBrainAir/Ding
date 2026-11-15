@@ -188,6 +188,10 @@ Wiring and firmware: `docs/HARDWARE.md`.
 
 Additions and clarifications; none of them change the shapes above.
 
+- Table endpoints only (`GET /api/table/{token}`, turn events `dishes` and `state`): `Dish` has nullable `local_name` /
+  `local_description` and `OrderItem` has nullable `local_name`, the cached names in the session's language (null when
+  not translated yet or the guest speaks the menu language). Dashboard and kitchen endpoints keep the original names.
+
 - Create endpoints return `201` (`POST /api/dishes`, `/api/dishes/bulk`, `/api/knowledge`,
   `/api/tables`); signup and login return `200`. Validation errors are `422` with `detail` as one
   readable string (`"email: enter a valid email address; password: ..."`).

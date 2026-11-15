@@ -86,6 +86,9 @@ export interface Dish {
   available: boolean
   created_at: string
   updated_at: string
+  /** Table endpoints only: the name / description in the session's language, or null. */
+  local_name?: string | null
+  local_description?: string | null
 }
 
 /** Body for POST /api/dishes and PATCH /api/dishes/{id}: Dish fields without id/photo_url. */
@@ -134,6 +137,8 @@ export interface OrderItem {
   notes: string | null
   allergen_flag: boolean
   photo_url: string | null
+  /** Table endpoints only: the dish name in the session's language, or null. */
+  local_name?: string | null
 }
 
 export interface Order {

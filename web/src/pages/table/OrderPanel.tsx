@@ -86,7 +86,8 @@ export function OrderPanel({
               >
                 <span className="w-8 shrink-0 font-display text-sm font-semibold tabular text-ink-soft">{item.quantity}x</span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{item.name}</p>
+                  <p className="font-medium">{item.local_name || item.name}</p>
+                  {item.local_name && <p className="text-xs text-ink-soft">{item.name}</p>}
                   {item.notes && <p className="text-sm text-ink-soft">{item.notes}</p>}
                   {item.allergen_flag && (
                     <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-paprika-soft px-2 py-0.5 text-xs font-semibold text-paprika-deep">

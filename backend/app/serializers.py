@@ -167,3 +167,22 @@ def session_detail_out(db: Session, s: GuestSession) -> dict:
     out["transcript"] = list(s.transcript or [])
     out["order"] = order_out(order) if order else None
     return out
+
+
+# ---- guest-facing (table endpoints only): original fields plus the session-language names
+
+
+def guest_dish_out(d: Dish, translations: dict) -> dict:
+    out = dish_out(d)
+    local = translations.get(d.id)
+    out["local_name"] = local.name if local is not None else None
+    out["local_description"] = local.description if local is not None else None
+    return out
+
+
+def guest_order_out(o: Order, translations: dict) -> dict:
+    out = order_out(o)
+    for item_out, item in zip(out["items"], o.items, strict=True):
+        local = translations.get(item.dish_id)
+        item_out["local_name"] = local.name if local is not None else None
+    return out

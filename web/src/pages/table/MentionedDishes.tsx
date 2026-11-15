@@ -29,10 +29,13 @@ export function MentionedDishes({
             </div>
             <div className="min-w-0 flex-1 py-0.5">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="truncate font-semibold text-paper">{dish.name}</p>
+                <p className="truncate font-semibold text-paper">{dish.local_name || dish.name}</p>
                 <p className="shrink-0 text-sm tabular text-saffron">{formatMoney(dish.price, currency)}</p>
               </div>
-              {dish.description && <p className="mt-0.5 line-clamp-2 text-sm text-linen/70">{dish.description}</p>}
+              {dish.local_name && <p className="truncate text-xs text-linen/55">{dish.name}</p>}
+              {(dish.local_description || dish.description) && (
+                <p className="mt-0.5 line-clamp-2 text-sm text-linen/70">{dish.local_description || dish.description}</p>
+              )}
               <AllergenChips
                 className="mt-2"
                 tone="dark"

@@ -19,13 +19,13 @@ from app.events import bus
 from app.models import GuestSession, Restaurant, utcnow
 from app.serializers import (
     allergies_out,
-    dish_out,
+    guest_dish_out,
+    guest_order_out,
     iso,
     latest_order,
-    order_out,
     session_summary_out,
 )
-from app.services import elevenlabs, llm, prompts, tts
+from app.services import elevenlabs, llm, prompts, translate, tts
 from app.services.speech import SpeechPipeline
 from app.services.tools import TOOLS, ToolContext, execute_tool
 
@@ -137,7 +137,12 @@ async def run_turn(
     index = prompts.menu_index(db, r)
     menu_update = prompts.menu_update_note(index) if index != s.menu_index else None
     s.menu_index = index
-    state = prompts.session_state(db, s, r, lang, menu_update=menu_update)
+    # Dish names in the guest's language: cached ones go in the state block; missing ones are
+    # translated in the background (never blocking this turn).
+    translations = translate.cached(db, r.id, lang)
+    if translate.needs_translation(r, lang) and not translations:
+        translate.ensure_in_background(r.id, lang)
+    state = prompts.session_state(db, s, r, lang, menu_update=menu_update, translations=translations)
     user_content = [
         {"type": "text", "text": prompts.sanitize_guest_text(guest_text)},
         {"type": "text", "text": state},
@@ -237,13 +242,14 @@ async def run_turn(
     s.last_activity_at = utcnow()
     db.commit()
 
+    translations = translate.cached(db, r.id, lang)  # may have arrived during the turn
     if ctx.shown_dishes:
-        await emit({"type": "dishes", "dishes": [dish_out(d) for d in ctx.shown_dishes.values()]})
+        await emit({"type": "dishes", "dishes": [guest_dish_out(d, translations) for d in ctx.shown_dishes.values()]})
     order = latest_order(db, s.id)
     await emit(
         {
             "type": "state",
-            "order": order_out(order) if order else None,
+            "order": guest_order_out(order, translations) if order else None,
             "allergies": allergies_out(s),
             "language": lang,
         }
