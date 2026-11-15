@@ -23,7 +23,7 @@ The older Arduino Uno + LED box still works with everything here; see [Legacy: A
 
 | Part | Notes |
 | --- | --- |
-| Mini ESP32 board with USB-C, pins labelled D0..D7 | Seeed XIAO ESP32-C3 / ESP32-S3, Arduino Nano ESP32 and similar. Needs Bluetooth LE for battery use (not ESP32-S2). |
+| Mini ESP32 board with USB-C, pins labelled D0..D8 | Seeed XIAO ESP32-C3 / ESP32-S3, Arduino Nano ESP32 and similar. Needs Bluetooth LE for battery use (not ESP32-S2). |
 | 16x2 character LCD, HD44780-compatible, 5 V | Used in 4-bit mode, write-only |
 | Momentary push button | Any normally-open button; arcade buttons work well |
 | 9 V battery + step-down (buck) module set to **5.0 V** | Only for battery use |
@@ -53,21 +53,21 @@ Pins are named by the silkscreen labels on the board.
 
 | Board pin | Connect to |
 | --- | --- |
-| D7 | push button, other side to GND (internal pull-up, no resistor) |
+| D8 | push button, other side to GND (internal pull-up, no resistor). The sketch also reads D7, so the button works on either pin. |
 | VBUS | 5 V from the buck module when on battery (and LCD VDD, A) |
 | GND | buck module GND, LCD VSS/V0/RW/K, button |
 
-What D0..D7 are on common boards (GPIO numbers; the sketch uses the D-names, so this is only for
+What D0..D8 are on common boards (GPIO numbers; the sketch uses the D-names, so this is only for
 reference or for the raw-GPIO fallback):
 
-| Board (Arduino board name) | D0 | D1 | D2 | D3 | D4 | D5 | D7 | Strapping pins among them |
+| Board (Arduino board name) | D0 | D1 | D2 | D3 | D4 | D5 | D7 / D8 (button) | Strapping pins among them |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Seeed XIAO ESP32-C3 (`XIAO_ESP32C3`) | 2 | 3 | 4 | 5 | 6 | 7 | 20 | D0 (GPIO2, harmless: the LCD only listens) |
-| Seeed XIAO ESP32-S3 (`XIAO_ESP32S3`) | 1 | 2 | 3 | 4 | 5 | 6 | 44 | D2 (GPIO3, harmless) |
-| Seeed XIAO ESP32-C6 (`XIAO_ESP32C6`): the board in the demo box | 0 | 1 | 2 | 21 | 22 | 23 | 17 | none |
-| Arduino Nano ESP32 (`nano_nora`) | D0..D7 as printed (the core maps them) | | | | | | | D0/D1 are also UART RX/TX: boot messages flicker the LCD before it starts, harmless |
+| Seeed XIAO ESP32-C3 (`XIAO_ESP32C3`) | 2 | 3 | 4 | 5 | 6 | 7 | 20 / 8 | D0 (GPIO2), D8 (GPIO8): don't hold the button while powering on |
+| Seeed XIAO ESP32-S3 (`XIAO_ESP32S3`) | 1 | 2 | 3 | 4 | 5 | 6 | 44 / 7 | D2 (GPIO3, harmless) |
+| Seeed XIAO ESP32-C6 (`XIAO_ESP32C6`): the board in the demo box | 0 | 1 | 2 | 21 | 22 | 23 | 17 / 19 | none |
+| Arduino Nano ESP32 (`nano_nora`) | D0..D8 as printed (the core maps them) | | | | | | | D0/D1 are also UART RX/TX: boot messages flicker the LCD before it starts, harmless |
 
-If your board package does not define `D0`..`D7` (compile error `'D0' was not declared in this
+If your board package does not define `D0`..`D8` (compile error `'D0' was not declared in this
 scope`), set `DING_USE_RAW_GPIO` to `1` at the top of the sketch and type your board's GPIO numbers
 into the block below it.
 
