@@ -6,7 +6,7 @@ import { LineSplitter } from './lineSplitter'
  * newline-terminated protocol from docs/API.md ("Table button serial protocol").
  *
  *   board → host   PRESS | RELEASE | READY
- *   host → board   STATE:idle|listening|thinking|speaking   INFO:<text, ASCII, 16 chars>
+ *   host → board   STATE:idle|listening|thinking|speaking   INFO:<text, ASCII, up to 60 chars>
  *
  * The page sets the desired state and info line; the link sends only what the
  * board does not have yet, and sends both again when the board says READY
@@ -21,9 +21,26 @@ export interface ButtonLinkCallbacks {
   onRelease: () => void
   /** The link went down, is trying to come back, or is back. */
   onStatus?: (status: ButtonLinkStatus) => void
+  /** The board said READY (rebooted, or a Bluetooth host just connected); state and info were re-sent. */
+  onReady?: () => void
 }
 
+/** Characters per LCD line. */
 export const LCD_WIDTH = 16
+/** Longest INFO text the firmware keeps. Longer than LCD_WIDTH scrolls on line 2. */
+export const INFO_MAX = 60
+
+// Line 2 marquee timing. Mirrored in firmware/table_button_esp32 (MARQUEE_* constants):
+// hold at the start, shift one character per step, hold at the end, start over.
+export const MARQUEE_HOLD_START_MS = 1200
+export const MARQUEE_STEP_MS = 280
+export const MARQUEE_HOLD_END_MS = 1200
+
+/** How long the board needs to scroll `text` once (0 for text that fits the display). */
+export function marqueePassMs(text: string): number {
+  const extra = lcdText(text, INFO_MAX).length - LCD_WIDTH
+  return extra > 0 ? MARQUEE_HOLD_START_MS + extra * MARQUEE_STEP_MS + MARQUEE_HOLD_END_MS : 0
+}
 
 /** Text the 16x2 LCD can show: printable ASCII, accents stripped, one '?' per other character. */
 export function lcdText(text: string, width = LCD_WIDTH): string {
@@ -76,9 +93,9 @@ export abstract class ButtonLink {
     return this.flush()
   }
 
-  /** LCD line 2. Sanitised to ASCII and cut to 16 characters; repeats are not sent. */
+  /** LCD line 2. Sanitised to ASCII and cut to INFO_MAX characters; repeats are not sent. */
   sendInfo(text: string): Promise<void> {
-    this.desiredInfo = lcdText(text)
+    this.desiredInfo = lcdText(text, INFO_MAX)
     return this.flush()
   }
 
@@ -112,6 +129,7 @@ export abstract class ButtonLink {
         this.sentState = null
         this.sentInfo = null
         void this.flush()
+        this.callbacks.onReady?.()
       }
     }
   }

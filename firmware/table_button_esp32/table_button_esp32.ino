@@ -7,7 +7,8 @@
 //   board -> host   PRESS | RELEASE           button edges (debounced, 25 ms)
 //                   READY                     after boot, and when a BLE host connects
 //   host -> board   STATE:idle|listening|thinking|speaking     LCD line 1
-//                   INFO:<text>               LCD line 2 (ASCII, 16 chars shown)
+//                   INFO:<text>               LCD line 2 (ASCII, up to 60 chars; longer than
+//                                             16 scrolls as a marquee)
 //
 // Unknown lines are ignored. See docs/HARDWARE.md for wiring, flashing and troubleshooting.
 // Needs: the "esp32" board package (Espressif) and the "LiquidCrystal" library.
@@ -79,7 +80,17 @@ const unsigned long BLE_READY_DELAY_MS = 1200;  // give the host time to subscri
 const unsigned long BLE_READVERTISE_MS = 300;
 const unsigned long THINKING_FRAME_MS = 400;
 
+// Line 2 marquee for INFO text longer than the display: hold at the start, shift one character
+// per step, hold at the end, start over. One pass of an N-character text takes
+// MARQUEE_HOLD_START_MS + (N - 16) * MARQUEE_STEP_MS + MARQUEE_HOLD_END_MS.
+// The guest screen uses the same numbers to decide how long to show each line
+// (web/src/lib/voice/buttonLink.ts: MARQUEE_HOLD_START_MS, MARQUEE_STEP_MS, MARQUEE_HOLD_END_MS).
+const unsigned long MARQUEE_HOLD_START_MS = 1200;
+const unsigned long MARQUEE_STEP_MS = 280;
+const unsigned long MARQUEE_HOLD_END_MS = 1200;
+
 const uint8_t LCD_COLS = 16;
+const uint8_t INFO_MAX = 60;  // longest INFO text kept; the rest is dropped
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_E, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 enum State { IDLE, LISTENING, THINKING, SPEAKING };
@@ -89,7 +100,9 @@ State state = IDLE;
 bool hostSeen = false;            // a STATE line arrived since boot / since the BLE host left
 Source stateSource = SRC_NONE;
 char deviceName[16] = "Ding";
-char infoText[LCD_COLS + 1] = "";  // LCD line 2
+char infoText[INFO_MAX + 1] = "";  // LCD line 2 (scrolls when longer than LCD_COLS)
+uint8_t infoLen = 0;
+unsigned long infoSince = 0;       // when the current INFO arrived: the marquee starts there
 char shown[2][LCD_COLS + 1];       // what the LCD shows now, to redraw only changes
 
 bool stablePressed = false;
@@ -99,7 +112,7 @@ unsigned long lastChangeMs = 0;
 // ------------------------------------------------------------------ line parsing
 
 struct LineBuffer {
-  char buf[64];
+  char buf[96];  // "INFO:" + 60 characters fits with room to spare
   uint8_t len = 0;
   bool overflow = false;
 };
@@ -126,15 +139,29 @@ void feed(LineBuffer &lb, char c, Source source) {
 }
 
 // ASCII only: the LCD's character ROM has no Cyrillic or Armenian. Each UTF-8 character
-// that is not plain ASCII becomes a single '?'.
+// that is not plain ASCII becomes a single '?'. Every new INFO restarts the marquee.
 void setInfo(const char *text) {
   uint8_t n = 0;
-  for (const unsigned char *p = (const unsigned char *)text; *p && n < LCD_COLS; p++) {
+  for (const unsigned char *p = (const unsigned char *)text; *p && n < INFO_MAX; p++) {
     unsigned char c = *p;
     if (c >= 0x80 && c < 0xC0) continue;  // UTF-8 continuation byte
     infoText[n++] = (c >= 0x20 && c < 0x7F) ? (char)c : '?';
   }
+  while (n > 0 && infoText[n - 1] == ' ') n--;  // trailing spaces would only add scroll steps
   infoText[n] = '\0';
+  infoLen = n;
+  infoSince = millis();
+}
+
+// Which character of a long INFO text is in the first column right now.
+uint8_t marqueeOffset(unsigned long now) {
+  if (infoLen <= LCD_COLS || (long)(now - infoSince) < 0) return 0;  // INFO newer than `now`
+  const unsigned long steps = infoLen - LCD_COLS;
+  const unsigned long pass = MARQUEE_HOLD_START_MS + steps * MARQUEE_STEP_MS + MARQUEE_HOLD_END_MS;
+  const unsigned long t = (now - infoSince) % pass;
+  if (t < MARQUEE_HOLD_START_MS) return 0;
+  const unsigned long shifted = 1 + (t - MARQUEE_HOLD_START_MS) / MARQUEE_STEP_MS;
+  return (uint8_t)(shifted < steps ? shifted : steps);  // then hold at the end
 }
 
 // ------------------------------------------------------------------ output to the host
@@ -310,7 +337,14 @@ void render(unsigned long now) {
     }
   }
   drawLine(0, line1);
-  drawLine(1, infoText[0] ? infoText : deviceName);
+  if (infoLen == 0) {
+    drawLine(1, deviceName);
+  } else {
+    char window[LCD_COLS + 1];
+    strncpy(window, infoText + marqueeOffset(now), LCD_COLS);
+    window[LCD_COLS] = '\0';
+    drawLine(1, window);
+  }
 }
 
 // ------------------------------------------------------------------ button

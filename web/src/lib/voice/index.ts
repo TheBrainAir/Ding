@@ -2,8 +2,13 @@ export { getAudioContext, unlockAudio } from './audioContext'
 export { BluetoothButton } from './bluetoothButton'
 export {
   ButtonLink,
+  INFO_MAX,
   LCD_WIDTH,
+  MARQUEE_HOLD_END_MS,
+  MARQUEE_HOLD_START_MS,
+  MARQUEE_STEP_MS,
   lcdText,
+  marqueePassMs,
   type ButtonLinkCallbacks,
   type ButtonLinkStatus,
   type ButtonTransport,

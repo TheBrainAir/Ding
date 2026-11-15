@@ -108,7 +108,7 @@ One message per line (`\n`; a `\r` before it is ignored), the same on the USB se
 | board → laptop | `PRESS` | Button went down (debounced, 25 ms) |
 | board → laptop | `RELEASE` | Button went up |
 | laptop → board | `STATE:idle` \| `STATE:listening` \| `STATE:thinking` \| `STATE:speaking` | LCD line 1 |
-| laptop → board | `INFO:<text>` | LCD line 2: ASCII, the first 16 characters are shown, anything else becomes `?` |
+| laptop → board | `INFO:<text>` | LCD line 2: ASCII, up to 60 characters (more are dropped), anything else becomes `?`. Text longer than 16 characters scrolls (see below). |
 
 Bluetooth LE uses the **Nordic UART Service**: service `6E400001-B5A3-F393-E0A9-E50E24DCCA9E`, the laptop
 writes to `6E400002-…` (RX) and subscribes to notifications on `6E400003-…` (TX). The box advertises as
@@ -121,8 +121,31 @@ edges; the laptop decides what a press means:
 - **tap to toggle**: a short tap starts recording, the next press sends it;
 - a press while the waiter thinks or speaks interrupts it (barge-in) and starts a new recording.
 
-The guest screen sends `INFO:` with the table label while nothing is ordered, `3 items $29.00` while
-the order is a draft, and `Order sent` / `Being prepared` / `Enjoy your meal` once it went to the kitchen.
+While nothing is ordered, the guest screen sends the table label as `INFO:`. As soon as the order
+has items, it pages line 2 through the order: one line per item, `<qty>x <name>` in the order the items
+were added, then the summary (`3 items $39.00` for a draft, `Order sent` / `Being prepared` /
+`Enjoy your meal` once it went to the kitchen), and around again. When the waiter adds an item (or
+raises a quantity), the rotation jumps straight to that item so the guest sees the choice confirmed;
+when the order is sent it jumps to `Order sent`. It keeps rotating while the waiter listens, thinks
+and speaks, pauses while the box is disconnected, and resumes on the same line after `READY`.
+
+**Marquee.** An `INFO` longer than 16 characters scrolls on line 2: it holds at the start for 1.2 s,
+moves one character every 280 ms, holds at the end for 1.2 s, and starts over; every new `INFO`
+restarts it. One pass of an N-character line takes `1200 + (N - 16) × 280 + 1200` ms. The guest screen
+shows each line for 2.5 s if it fits, or for exactly one pass if it scrolls. The numbers live in
+`web/src/lib/voice/buttonLink.ts` (`MARQUEE_*`) and are mirrored in the sketch (`MARQUEE_*_MS`); change
+both together.
+
+Example, an order of Mushroom Gyoza, Korean BBQ Beef Bowl and Lemongrass Ginger Lemonade:
+
+| Line 2 | Length | On screen for |
+| --- | --- | --- |
+| `1x Mushroom Gyoza` | 17 | 2.7 s (scrolls by one character) |
+| `1x Korean BBQ Beef Bowl` | 23 | 4.4 s |
+| `1x Lemongrass Ginger Lemonade` | 29 | 6.0 s |
+| `3 items $39.00` | 14 | 2.5 s |
+
+then back to the first item, about 15.6 s per round.
 
 ## What the LCD shows
 
@@ -134,7 +157,7 @@ the order is a draft, and `Order sent` / `Being prepared` / `Enjoy your meal` on
 | `Thinking` + animated dots | waiting for the reply |
 | `Speaking...` | the waiter is talking |
 
-Line 2 is the last `INFO` text. Before any arrives it shows the box's Bluetooth name (`Ding-XXXX`),
+Line 2 is the last `INFO` text, scrolling when it is longer than 16 characters. Before any arrives it shows the box's Bluetooth name (`Ding-XXXX`),
 which is the name to pick in the browser's Bluetooth chooser. `BT connected` / `BT link lost` appear
 there when a Bluetooth host connects or the link drops.
 
@@ -200,7 +223,7 @@ Bluetooth works on Android Chrome only.
    shows `Waiting for host` / `Ding-XXXX`.
 2. **Serial Monitor** at 115200: `READY` appears after a reset.
 3. **Type STATE lines** in the monitor: `STATE:idle` shows `Hold to talk`, `STATE:thinking` animates,
-   `INFO:Table 4` changes line 2, `INFO:Стол` shows `????`.
+   `INFO:Table 4` changes line 2, `INFO:1x Korean BBQ Beef Bowl` scrolls, `INFO:Стол` shows `????`.
 4. **Press the button**: `PRESS` on the way down, `RELEASE` on the way up, once each per press.
 5. **Bluetooth**: close the Serial Monitor, power the box from the battery, open the guest screen,
    Connect table button > Bluetooth > `Ding-XXXX`. Hold the button and speak: the LCD shows
@@ -222,8 +245,8 @@ cd bridge && uv run ding-bridge --list-ports      # pick --port (default: auto-d
 ```
 
 - It finds the box on USB serial (`--port` to choose), keeps the display in sync with `STATE:...` and
-  the same `INFO:` lines as the guest screen, and reconnects by itself when the box is unplugged and
-  plugged back in.
+  an `INFO:` summary line (table label, `3 items $39.00`, `Order sent`; it does not page through the
+  items like the guest screen), and reconnects by itself when the box is unplugged and plugged back in.
 - Same press rules as the guest screen: hold to talk, tap to start and tap again to send, a press
   while the waiter thinks or talks interrupts it.
 - It records from the default microphone, streams the turn to `POST /api/table/{token}/turn` and plays

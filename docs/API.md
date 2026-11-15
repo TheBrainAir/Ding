@@ -172,9 +172,13 @@ service `6E400001-B5A3-F393-E0A9-E50E24DCCA9E`, host writes to RX `6E400002-…`
 - Board → host: `PRESS`, `RELEASE`, `READY` (after boot, and about a second after a Bluetooth host
   connects; the host answers with its current `STATE` and `INFO`)
 - Host → board: `STATE:idle` | `STATE:listening` | `STATE:thinking` | `STATE:speaking` (LCD line 1)
-- Host → board: `INFO:<text>` (LCD line 2; ASCII, 16 characters shown, other characters become `?`).
-  The guest screen sends the table label, `N items $X` for a draft order, or `Order sent` once placed.
-  The legacy Uno sketch ignores it.
+- Host → board: `INFO:<text>` (LCD line 2; ASCII, up to 60 characters, other characters become `?`).
+  Text longer than 16 characters scrolls as a marquee: hold 1.2 s, one character per 280 ms, hold
+  1.2 s, repeat; a new `INFO` restarts it. While the order has items, the guest screen pages through
+  them, one `INFO` per line: `<qty>x <name>` per item in the order added, then `N items $X` (draft)
+  or `Order sent` / `Being prepared` / `Enjoy your meal`, then around again; 2.5 s per line, or one
+  full scroll for long lines; a newly added item is shown first. With no items it sends the table
+  label. The legacy Uno sketch ignores `INFO`.
 
 The headless bridge (`bridge/`, `ding-bridge --table <token>`) speaks the same protocol over USB
 serial in place of the browser and re-sends `STATE` / `INFO` after `READY` or a re-plug.

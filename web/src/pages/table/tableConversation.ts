@@ -19,7 +19,7 @@ import {
   type MicError,
   type TurnInput,
 } from '@/lib/voice'
-import { buttonInfoLine } from './buttonInfo'
+import { InfoRotation } from './infoRotation'
 
 export type MicStatus = 'unknown' | 'ready' | MicError
 export type ButtonStatus = 'unsupported' | ButtonLinkStatus
@@ -125,6 +125,8 @@ export class TableConversation {
   /** True while we close a link ourselves, so it is not reported as "unplugged". */
   private closingLink = false
   private tableLabel = ''
+  /** Pages LCD line 2 through the order while the button is connected. */
+  private rotation = new InfoRotation((text) => void this.link?.sendInfo(text))
   private abort: AbortController | null = null
   private turnId = 0
   private voiceExpected = false
@@ -150,6 +152,9 @@ export class TableConversation {
       onPress: () => this.pressStart(),
       onRelease: () => this.pressEnd(),
       onStatus: (status: ButtonLinkStatus) => this.onLinkStatus(transport, status),
+      onReady: () => {
+        if (this.link === this.links[transport]) this.rotation.resume()
+      },
     })
     this.links = { usb: new SerialButton(callbacks('usb')), bluetooth: new BluetoothButton(callbacks('bluetooth')) }
   }
@@ -229,6 +234,7 @@ export class TableConversation {
     this.recorder.dispose()
     this.press.reset()
     this.clearTimers()
+    this.rotation.stop()
     this.closingLink = true
     void Promise.all([this.links.usb.disconnect(), this.links.bluetooth.disconnect()]).finally(() => {
       this.closingLink = false
@@ -267,12 +273,11 @@ export class TableConversation {
 
   // ---- the table button (USB cable or Bluetooth) ----
 
-  /** Tell the button what to show: state on LCD line 1 (or the Uno's LED), info on line 2. */
+  /** Tell the button what to show: state on LCD line 1 (or the Uno's LED), the order on line 2. */
   private syncButton() {
+    this.rotation.update(this.snap.order, this.tableLabel)
     const link = this.link
-    if (!link?.connected) return
-    void link.sendState(this.snap.state)
-    void link.sendInfo(buttonInfoLine(this.snap.order, this.tableLabel))
+    if (link?.connected) void link.sendState(this.snap.state)
   }
 
   private onLinkStatus(transport: ButtonTransport, status: ButtonLinkStatus) {
@@ -295,6 +300,8 @@ export class TableConversation {
       transport: status === 'disconnected' ? null : transport,
     }
     this.set(notice === undefined ? { button } : { button, notice })
+    if (status === 'connected') this.rotation.resume()
+    else this.rotation.stop()
   }
 
   /** On page load: reopen the button used last time, without a prompt, if the browser allows. */
@@ -354,6 +361,7 @@ export class TableConversation {
   async disconnectButton() {
     const link = this.link
     this.link = null
+    this.rotation.stop()
     rememberTransport(null)
     if (link) {
       this.closingLink = true

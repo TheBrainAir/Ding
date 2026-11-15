@@ -1,5 +1,5 @@
-import type { Order } from '@/api/types'
-import { LCD_WIDTH, lcdText } from '@/lib/voice'
+import type { Order, OrderItem } from '@/api/types'
+import { INFO_MAX, LCD_WIDTH, lcdText } from '@/lib/voice'
 
 const CURRENCY_PREFIX: Record<string, string> = { USD: '$', CAD: '$', AUD: '$', NZD: '$', SGD: '$', HKD: '$', MXN: '$' }
 
@@ -39,4 +39,37 @@ export function buttonInfoLine(order: Order | null, tableLabel: string): string 
     default:
       return label
   }
+}
+
+/** One line the LCD shows in turn; `key` follows the same item across updates. */
+export interface InfoLine {
+  key: string
+  text: string
+}
+
+/** "<qty>x <name>", ASCII, up to INFO_MAX characters (the board scrolls long ones). */
+export function itemInfoLine(item: OrderItem): string {
+  return lcdText(`${item.quantity}x ${item.name}`, INFO_MAX)
+}
+
+/**
+ * What line 2 of the LCD cycles through: every item in the order it was added, then the
+ * summary ("3 items $51.00", or "Order sent" once placed). Just the table label when
+ * nothing is ordered.
+ */
+export function orderInfoLines(order: Order | null, tableLabel: string): InfoLine[] {
+  if (!order || order.items.length === 0 || order.status === 'cancelled') {
+    return [{ key: 'label', text: buttonInfoLine(null, tableLabel) }]
+  }
+  return [
+    ...order.items.map((item) => ({ key: `item:${item.id}`, text: itemInfoLine(item) })),
+    { key: 'summary', text: buttonInfoLine(order, tableLabel) },
+  ]
+}
+
+/** Items that are new, or whose quantity went up, compared with the previous list. */
+export function addedItemIds(before: OrderItem[] | undefined, after: OrderItem[] | undefined): number[] {
+  if (!before || !after) return []
+  const previous = new Map(before.map((item) => [item.id, item.quantity]))
+  return after.filter((item) => item.quantity > (previous.get(item.id) ?? 0)).map((item) => item.id)
 }

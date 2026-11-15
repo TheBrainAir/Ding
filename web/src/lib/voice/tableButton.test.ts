@@ -12,7 +12,7 @@ import {
   type BtServer,
   type BtService,
 } from './bluetoothButton'
-import { lcdText, type ButtonLinkStatus } from './buttonLink'
+import { lcdText, marqueePassMs, type ButtonLinkStatus } from './buttonLink'
 import { SerialButton } from './serialButton'
 
 const enc = new TextEncoder()
@@ -170,10 +170,19 @@ describe('BluetoothButton', () => {
     const { button } = makeButton(fakeBluetooth(device).api)
     await button.connect()
     device.rx.writes = []
-    await button.sendInfo('2 items $29.00 and more text')
+    await button.sendInfo('1x Lemongrass Ginger Lemonade')
     expect(device.rx.writes.every((w) => w.length <= WRITE_CHUNK)).toBe(true)
-    expect(device.rx.writes.length).toBe(2)
-    expect(device.written).toBe('INFO:2 items $29.00 a\n') // 16 LCD characters, sent as 20 + 2 bytes
+    expect(device.rx.writes.length).toBe(2) // 35 bytes: 20 + 15
+    expect(device.written).toBe('INFO:1x Lemongrass Ginger Lemonade\n')
+  })
+
+  it('keeps INFO to 60 characters (the board scrolls anything over 16)', async () => {
+    const device = new FakeDevice()
+    const { button } = makeButton(fakeBluetooth(device).api)
+    await button.connect()
+    device.rx.writes = []
+    await button.sendInfo('x'.repeat(80))
+    expect(device.written).toBe(`INFO:${'x'.repeat(60)}\n`)
   })
 
   it('reconnects with backoff after the link drops, without a new click', async () => {
@@ -292,6 +301,15 @@ describe('SerialButton', () => {
 })
 
 // ---------------------------------------------------------------- LCD text
+
+describe('marqueePassMs', () => {
+  it('is zero for text that fits and one full scroll otherwise', () => {
+    expect(marqueePassMs('Table 4')).toBe(0)
+    expect(marqueePassMs('x'.repeat(16))).toBe(0)
+    expect(marqueePassMs('x'.repeat(17))).toBe(1200 + 280 + 1200)
+    expect(marqueePassMs('x'.repeat(100))).toBe(1200 + 44 * 280 + 1200) // capped at 60 characters
+  })
+})
 
 describe('lcdText', () => {
   it('keeps plain ASCII and cuts to 16 characters', () => {
