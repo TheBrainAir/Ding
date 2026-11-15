@@ -46,11 +46,11 @@ export function DishCard({
   return (
     <SpotlightCard
       theme="light"
-      spotlightColor="rgba(242, 169, 59, 0.22)"
+      spotlightColor="rgba(113, 113, 122, 0.14)"
       intensity={0.5}
       spotlightSize={260}
       borderGlow={0.6}
-      className={cn('flex h-full flex-col !rounded-[28px] !p-0 ring-1 ring-line', !dish.available && 'opacity-75')}
+      className={cn('flex h-full flex-col !rounded-xl !p-0 shadow-xs ring-1 ring-line', !dish.available && 'opacity-75')}
       style={{ '--spotlight-card-surface': 'var(--paper)', '--spotlight-card-shadow': 'none' } as React.CSSProperties}
     >
       <button

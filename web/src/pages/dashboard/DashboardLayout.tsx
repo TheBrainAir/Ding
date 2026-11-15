@@ -10,6 +10,7 @@ import type { DashboardEvent } from '@/api/types'
 import { BellMark } from '@/components/brand/BellMark'
 import { Button } from '@/components/ui/button'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { useShadcnTheme } from '@/hooks/use-shadcn-theme'
 import { PRODUCT_NAME } from '@/config'
 import { AppSidebar } from './shell/AppSidebar'
 import { CommandPalette } from './shell/CommandPalette'
@@ -27,6 +28,7 @@ function readKitchenMode() {
 }
 
 export function DashboardLayout() {
+  useShadcnTheme()
   const me = useMe()
   const location = useLocation()
 
@@ -114,9 +116,9 @@ function SignedInShell({ restaurantName, email }: { restaurantName: string; emai
 
   return (
     <ShellContext.Provider value={shell}>
-      <SidebarProvider className="bg-linen">
+      <SidebarProvider>
         {!kitchenMode && <AppSidebar restaurantName={restaurantName} email={email} onLogout={() => logout.mutate()} />}
-        <SidebarInset className="min-w-0 bg-linen">
+        <SidebarInset className="min-w-0 bg-background">
           <Topbar
             restaurantName={restaurantName}
             extra={

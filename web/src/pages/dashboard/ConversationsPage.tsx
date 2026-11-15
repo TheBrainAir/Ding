@@ -72,14 +72,14 @@ export function ConversationsPage() {
         <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
           <nav aria-label="Conversations" className={cn('rounded-[28px] border border-line bg-paper', selected && 'hidden lg:block')}>
             <div className="flex flex-wrap items-center gap-2 border-b border-line p-3">
-              <ToggleGroup type="single" value={filter} onValueChange={(v) => v && setFilter(v as Filter)} className="rounded-full bg-linen-deep p-0.5" aria-label="Show">
-                <ToggleGroupItem value="all" className="h-8 rounded-full px-3 text-sm data-[state=on]:bg-paper">
+              <ToggleGroup type="single" value={filter} onValueChange={(v) => v && setFilter(v as Filter)} variant="outline" aria-label="Show">
+                <ToggleGroupItem value="all" className="h-8 px-3 text-sm">
                   All
                 </ToggleGroupItem>
-                <ToggleGroupItem value="live" className="h-8 rounded-full px-3 text-sm data-[state=on]:bg-paper">
+                <ToggleGroupItem value="live" className="h-8 px-3 text-sm">
                   Live {liveCount > 0 && <span className="text-ink-soft tabular">{liveCount}</span>}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="allergies" className="h-8 rounded-full px-3 text-sm data-[state=on]:bg-paper">
+                <ToggleGroupItem value="allergies" className="h-8 px-3 text-sm">
                   Allergies
                 </ToggleGroupItem>
               </ToggleGroup>

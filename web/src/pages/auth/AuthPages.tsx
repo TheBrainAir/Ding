@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import RotatingText from '@/components/reactbits/RotatingText'
 import StarBorder from '@/components/reactbits/StarBorder'
 import { PRODUCT_NAME } from '@/config'
+import { useShadcnTheme } from '@/hooks/use-shadcn-theme'
 
 const DEMO: { state: ButtonState; ms: number }[] = [
   { state: 'idle', ms: 2600 },
@@ -52,7 +53,7 @@ function SpeaksLine({ className }: { className?: string }) {
           texts={LANGUAGES}
           rotationInterval={2200}
           staggerDuration={0.02}
-          mainClassName="inline-flex overflow-hidden rounded-xl bg-saffron px-2.5 py-0.5 text-ink"
+          mainClassName="inline-flex overflow-hidden rounded-md bg-white px-2 py-0.5 text-zinc-900"
           splitLevelClassName="overflow-hidden"
           transition={{ type: 'spring', damping: 30, stiffness: 400 }}
         />
@@ -62,23 +63,23 @@ function SpeaksLine({ className }: { className?: string }) {
 }
 
 function AuthShell({ title, subtitle, children }: { title: string; subtitle: ReactNode; children: ReactNode }) {
+  useShadcnTheme()
   const [still] = useState(prefersReducedMotion)
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
       <aside
-        className="relative isolate hidden flex-col justify-between overflow-hidden p-10 text-linen lg:flex"
-        style={{ background: 'radial-gradient(900px 700px at 50% 45%, #1f4a39 0%, var(--bistro-deep) 50%, var(--bistro-night) 100%)' }}
+        className="relative isolate hidden flex-col justify-between overflow-hidden bg-zinc-900 p-10 text-white lg:flex"
       >
         <div className="absolute inset-0 -z-10 opacity-60" aria-hidden>
           <Suspense fallback={null}>
-            <Threads color="#f2a93b" accentColor="#fce9c6" amplitude={1.1} distance={0.3} lineCount={36} thickness={0.5} speed={0.25} opacity={0.55} paused={still} />
+            <Threads color="#a1a1aa" accentColor="#e4e4e7" amplitude={1.1} distance={0.3} lineCount={36} thickness={0.5} speed={0.25} opacity={0.55} paused={still} />
           </Suspense>
         </div>
         <Wordmark onDark />
         <DemoOrb />
         <div className="grid gap-4">
-          <SpeaksLine className="font-display text-2xl leading-snug font-semibold" />
-          <p className="max-w-md text-lg text-linen/80">
+          <SpeaksLine className="text-2xl leading-snug font-semibold tracking-tight" />
+          <p className="max-w-md text-lg text-zinc-300">
             A voice waiter for every table. Guests press a button and talk in their own language. It always asks about allergies.
           </p>
         </div>
@@ -86,10 +87,10 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: Rea
       <main className="flex flex-col px-6 py-8 sm:px-12">
         <div className="lg:hidden">
           <Wordmark />
-          <SpeaksLine className="mt-3 font-display text-lg font-semibold" />
+          <SpeaksLine className="mt-3 text-lg font-semibold tracking-tight" />
         </div>
         <div className="m-auto w-full max-w-sm py-10">
-          <h1 className="text-[1.75rem] font-semibold">{title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-1.5 text-ink-soft">{subtitle}</p>
           <div className="mt-8">{children}</div>
         </div>
@@ -105,13 +106,13 @@ function PrimarySubmit({ pending, children }: { pending: boolean; children: Reac
       as="button"
       type="submit"
       disabled={pending}
-      className="mt-2 w-full text-base font-semibold"
-      color="#f2a93b"
-      trailColor="#fce9c6"
-      backgroundColor="var(--bistro)"
-      textColor="var(--paper)"
-      borderColor="rgba(242, 169, 59, 0.35)"
-      radius={999}
+      className="mt-2 h-9 w-full py-0 text-sm font-medium"
+      color="#a1a1aa"
+      trailColor="#e4e4e7"
+      backgroundColor="#171717"
+      textColor="#fafafa"
+      borderColor="rgba(0, 0, 0, 0.12)"
+      radius={8}
       thickness={2}
       duration={5}
     >

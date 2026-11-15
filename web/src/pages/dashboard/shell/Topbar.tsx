@@ -30,10 +30,10 @@ export function Topbar({ restaurantName, extra }: { restaurantName: string; extr
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-line bg-linen/90 px-3 backdrop-blur supports-[backdrop-filter]:bg-linen/75 sm:px-5">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-5">
       {!kitchenMode && (
         <>
-          <SidebarTrigger className="-ml-1 rounded-full text-ink-soft hover:bg-linen-deep hover:text-ink" aria-label="Toggle sidebar" />
+          <SidebarTrigger className="-ml-1" aria-label="Toggle sidebar" />
           <Separator orientation="vertical" className="mr-1 !h-5" />
         </>
       )}
@@ -55,7 +55,7 @@ export function Topbar({ restaurantName, extra }: { restaurantName: string; extr
           <button
             type="button"
             onClick={openCommand}
-            className="hidden h-9 items-center gap-2 rounded-full border border-input bg-paper pr-1.5 pl-3 text-sm text-ink-soft transition-colors hover:text-ink focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none lg:inline-flex"
+            className="hidden h-9 items-center gap-2 rounded-md border border-input bg-background pr-1.5 pl-3 text-sm text-muted-foreground shadow-xs transition-colors hover:text-ink focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none lg:inline-flex"
           >
             <Search className="size-4" aria-hidden />
             Search or jump to
@@ -108,7 +108,7 @@ function VoicePill() {
   if (status === 'loading') return null
   if (status === 'on') {
     return (
-      <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-sage-soft px-3 text-sm font-medium text-bistro" title="Guests can talk out loud">
+      <span className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-sm font-medium" title="Guests can talk out loud">
         <Mic className="size-3.5" aria-hidden />
         <span className="hidden sm:inline">Voice on</span>
         <span className="sr-only sm:hidden">Voice on</span>
@@ -120,14 +120,14 @@ function VoicePill() {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-input bg-paper px-3 text-sm text-ink-soft transition-colors hover:text-ink focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-dashed border-input bg-background px-2.5 text-sm text-muted-foreground transition-colors hover:text-ink focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
         >
           <MicOff className="size-3.5" aria-hidden />
           <span className="hidden xl:inline">Text mode: add an ElevenLabs key to enable voice</span>
           <span className="xl:hidden">Text mode</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 rounded-2xl border-line bg-paper text-sm">
+      <PopoverContent align="end" className="w-80 text-sm">
         <p className="font-semibold">The waiter is in text mode</p>
         <p className="mt-1.5 text-ink-soft">
           Guests type on the table screen and read the replies. Speech needs an ElevenLabs key: set <code className="rounded bg-linen px-1">ELEVENLABS_API_KEY</code> in{' '}
@@ -146,7 +146,7 @@ function OpenTableMenu() {
   const list = tables.data ?? []
   if (list.length === 1) {
     return (
-      <Button asChild variant="accent" size="sm">
+      <Button asChild size="sm" className="rounded-md">
         <a href={list[0].url} target="_blank" rel="noreferrer">
           <MonitorSmartphone aria-hidden />
           <span className="hidden sm:inline">Open table screen</span>
@@ -158,7 +158,7 @@ function OpenTableMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="accent" size="sm" aria-label="Open a table screen">
+        <Button size="sm" className="rounded-md" aria-label="Open a table screen">
           <MonitorSmartphone aria-hidden />
           <span className="hidden sm:inline">Open table screen</span>
         </Button>

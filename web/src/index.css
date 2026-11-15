@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/unbounded";
 @import "@fontsource-variable/figtree";
+@import "@fontsource-variable/geist";
 
 /*
  * Ding palette — a brasserie at dinner time.
@@ -184,5 +185,112 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Dashboard and auth pages wear stock shadcn/ui (neutral, new-york). The class sits on <html>
+ * only while those routes are mounted, so portals (dialogs, sheets, the command palette) get it
+ * too, and the guest table screen keeps the brasserie look above.
+ */
+html.theme-shadcn {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
+  --destructive: #dc2626;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #a3a3a3;
+
+  --sidebar: #fafafa;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #171717;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f0f0f0;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #a3a3a3;
+
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Brand variables, remapped: neutrals, near-black for "bistro", one amber accent, red for allergy. */
+  --linen: #fafafa;
+  --linen-deep: #f4f4f5;
+  --paper: #ffffff;
+  --bistro: #171717;
+  --bistro-deep: #0a0a0a;
+  --bistro-night: #0a0a0a;
+  --ink: #0a0a0a;
+  --ink-soft: #737373;
+  --saffron: #f59e0b;
+  --saffron-deep: #b45309;
+  --saffron-soft: #fef3c7;
+  --line: #e5e5e5;
+  --paprika: #dc2626;
+  --paprika-deep: #b91c1c;
+  --paprika-soft: #fee2e2;
+  --sage-soft: #f4f4f5;
+}
+
+@layer utilities {
+  html.theme-shadcn,
+  html.theme-shadcn body,
+  html.theme-shadcn :where(h1, h2, h3, h4, p, span, div, button, input, textarea, select, label, a, li, td, th, dt, dd),
+  html.theme-shadcn .font-display,
+  html.theme-shadcn .font-sans {
+    font-family: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  html.theme-shadcn :where(h1, h2, h3),
+  html.theme-shadcn .font-display {
+    letter-spacing: -0.025em;
+  }
+  html.theme-shadcn :where(code, kbd, pre),
+  html.theme-shadcn .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  /* Default shadcn shapes: rounded-md buttons, cards at radius-xl. */
+  html.theme-shadcn [data-slot="button"],
+  html.theme-shadcn [data-slot="select-trigger"],
+  html.theme-shadcn [data-slot="input"],
+  html.theme-shadcn [data-slot="textarea"],
+  html.theme-shadcn [data-slot="toggle-group-item"] {
+    border-radius: var(--radius-md);
+  }
+  html.theme-shadcn .rounded-\[28px\],
+  html.theme-shadcn .rounded-\[24px\] {
+    border-radius: var(--radius-xl);
+  }
+  html.theme-shadcn .rounded-\[22px\],
+  html.theme-shadcn .rounded-\[20px\],
+  html.theme-shadcn .rounded-\[18px\] {
+    border-radius: var(--radius-lg);
+  }
+  /* The brand "accent" button becomes the stock primary button. */
+  html.theme-shadcn [data-slot="button"][data-variant="accent"] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  html.theme-shadcn [data-slot="button"][data-variant="accent"]:hover {
+    background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+    color: var(--primary-foreground);
+  }
+  html.theme-shadcn ::selection {
+    background: #e5e5e5;
   }
 }

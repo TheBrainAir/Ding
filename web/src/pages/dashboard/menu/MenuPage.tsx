@@ -205,7 +205,7 @@ export function MenuPage() {
                     {freeOf.length ? `Free of ${freeOf.length === 1 ? labels.allergen(freeOf[0]).toLowerCase() : `${freeOf.length} allergens`}` : 'Free of…'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="w-72 rounded-2xl border-line bg-paper">
+                <PopoverContent align="start" className="w-72">
                   <p className="text-sm font-semibold">Show dishes free of</p>
                   <p className="text-xs text-ink-soft">Counts traces (“may contain”) too.</p>
                   <div className="mt-3 grid grid-cols-2 gap-1.5">
@@ -230,13 +230,13 @@ export function MenuPage() {
                 type="single"
                 value={view}
                 onValueChange={(v) => v && setViewRemembered(v as View)}
-                className="ml-auto rounded-full border border-input bg-paper p-0.5"
+                className="ml-auto"
                 aria-label="View"
               >
-                <ToggleGroupItem value="grid" aria-label="Grid view" className="rounded-full px-3 data-[state=on]:bg-bistro data-[state=on]:text-paper">
+                <ToggleGroupItem value="grid" aria-label="Grid view" className="px-3">
                   <LayoutGrid aria-hidden />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="list" aria-label="List view" className="rounded-full px-3 data-[state=on]:bg-bistro data-[state=on]:text-paper">
+                <ToggleGroupItem value="list" aria-label="List view" className="px-3">
                   <List aria-hidden />
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -313,7 +313,7 @@ function CategoryTab({ active, onClick, count, children }: { active: boolean; on
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
+        'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 text-sm font-medium whitespace-nowrap shadow-xs transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
         active ? 'border-bistro bg-bistro text-paper' : 'border-input bg-paper text-ink hover:bg-linen-deep',
       )}
     >

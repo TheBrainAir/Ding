@@ -15,7 +15,7 @@ export function PageHeader({
   return (
     <header className={cn('mb-8 flex flex-wrap items-end justify-between gap-4', className)}>
       <div className="min-w-0">
-        <h1 className="text-[1.75rem] leading-tight font-semibold">{title}</h1>
+        <h1 className="text-2xl leading-tight font-semibold tracking-tight">{title}</h1>
         {description && <p className="mt-1.5 max-w-[62ch] text-ink-soft">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -38,7 +38,7 @@ export function EmptyState({
 }) {
   return (
     <div className={cn('flex flex-col items-center rounded-[28px] border border-dashed border-input px-6 py-14 text-center', className)}>
-      {icon && <div className="mb-4 grid size-14 place-items-center rounded-full bg-saffron-soft text-ink [&_svg]:size-6">{icon}</div>}
+      {icon && <div className="mb-4 grid size-12 place-items-center rounded-lg border bg-muted text-foreground [&_svg]:size-5">{icon}</div>}
       <h2 className="font-display text-lg font-semibold">{title}</h2>
       {children && <p className="mt-1.5 max-w-[48ch] text-ink-soft">{children}</p>}
       {action && <div className="mt-5">{action}</div>}
@@ -48,7 +48,7 @@ export function EmptyState({
 
 export function Panel({ className, children, ...rest }: React.ComponentProps<'section'>) {
   return (
-    <section className={cn('rounded-[28px] border border-line bg-paper p-6', className)} {...rest}>
+    <section className={cn('rounded-[28px] border border-line bg-paper p-6 shadow-xs', className)} {...rest}>
       {children}
     </section>
   )

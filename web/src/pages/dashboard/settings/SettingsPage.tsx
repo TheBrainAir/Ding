@@ -92,14 +92,14 @@ function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
   return (
     <form onSubmit={submit} className="grid gap-6 pb-24">
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
-        <TabsList className="h-11 rounded-full bg-linen-deep p-1">
-          <TabsTrigger value="restaurant" className="rounded-full px-4 data-[state=active]:bg-paper">
+        <TabsList>
+          <TabsTrigger value="restaurant">
             Restaurant
           </TabsTrigger>
-          <TabsTrigger value="voice" className="rounded-full px-4 data-[state=active]:bg-paper">
+          <TabsTrigger value="voice">
             Waiter and voice
           </TabsTrigger>
-          <TabsTrigger value="models" className="rounded-full px-4 data-[state=active]:bg-paper">
+          <TabsTrigger value="models">
             Models
           </TabsTrigger>
         </TabsList>
@@ -212,14 +212,14 @@ function SettingsForm({ restaurant }: { restaurant: Restaurant }) {
 
       {dirty.length > 0 && (
         <div className="fixed inset-x-0 bottom-4 z-20 flex justify-center px-4 animate-in fade-in-0 slide-in-from-bottom-2">
-          <div className="flex items-center gap-3 rounded-full bg-ink p-1.5 pl-5 text-paper shadow-[0_16px_40px_-16px_rgb(23_54_42/0.7)]">
+          <div className="flex items-center gap-3 rounded-lg border bg-background p-1.5 pl-4 text-foreground shadow-lg">
             <span className="text-sm">
               {dirty.length} unsaved {dirty.length === 1 ? 'change' : 'changes'}
             </span>
-            <Button type="button" variant="ghost" size="sm" className="text-paper hover:bg-white/10 hover:text-paper" onClick={() => setForm(initial)}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setForm(initial)}>
               Discard
             </Button>
-            <Button type="submit" variant="accent" size="sm" disabled={save.isPending}>
+            <Button type="submit" size="sm" disabled={save.isPending}>
               {save.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Check aria-hidden />}
               Save changes
             </Button>

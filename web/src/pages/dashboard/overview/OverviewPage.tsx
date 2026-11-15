@@ -54,7 +54,7 @@ export function OverviewPage() {
             direction="bottom"
             delay={90}
             trigger="load"
-            className="font-display text-[clamp(1.7rem,3.4vw,2.6rem)] leading-tight font-semibold tracking-[-0.03em] text-ink"
+            className="text-3xl leading-tight font-semibold tracking-tight text-foreground"
           />
           <p className="mt-1 text-ink-soft">{stats.data ? summaryLine(stats.data) : ' '}</p>
         </div>
@@ -150,7 +150,7 @@ function StatStrip({ stats }: { stats: Stats }) {
               {c.attention && <BellRing className="size-3.5 text-saffron-deep" aria-hidden />}
               {c.label}
             </span>
-            <span className={cn('mt-1 block font-display text-[1.75rem] leading-none font-semibold tabular', c.attention && 'text-saffron-deep')}>
+            <span className={cn('mt-1 block text-2xl leading-none font-semibold tracking-tight tabular', c.attention && 'text-saffron-deep')}>
               <CountUp to={c.value} decimals={c.decimals ?? 0} prefix={c.prefix} suffix={c.suffix} duration={1.1} separator="," trigger="load" />
             </span>
           </>
@@ -207,7 +207,7 @@ function TopDishes({ stats }: { stats: Stats | undefined }) {
               <span className="shrink-0 text-ink-soft tabular">{d.quantity}</span>
             </div>
             <div className="mt-1 h-1.5 rounded-full bg-linen-deep">
-              <div className="h-full rounded-full bg-bistro" style={{ width: `${(d.quantity / max) * 100}%` }} />
+              <div className="h-full rounded-full bg-chart-1" style={{ width: `${(d.quantity / max) * 100}%` }} />
             </div>
           </div>
         </li>
@@ -243,7 +243,7 @@ function Languages({ stats }: { stats: Stats | undefined }) {
               <span className="shrink-0 text-ink-soft tabular">{l.sessions}</span>
             </div>
             <div className="mt-1 h-1.5 rounded-full bg-linen-deep">
-              <div className="h-full rounded-full bg-saffron-deep" style={{ width: `${(l.sessions / max) * 100}%` }} />
+              <div className="h-full rounded-full bg-chart-2" style={{ width: `${(l.sessions / max) * 100}%` }} />
             </div>
           </li>
         )
