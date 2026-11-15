@@ -15,7 +15,7 @@ commit keys.
 | `backend/` | Python 3.12, uv, FastAPI, SQLAlchemy 2, SQLite | API on **:8010** (8000 is taken on the dev machine) |
 | `web/` | React 19, Vite, TS, Tailwind | :5173, proxies `/api` and `/media` to :8010 |
 | `bridge/` | Python 3.12, uv, sounddevice, pyserial | Headless mode (`ding-bridge --table <token>`): button + mic + speaker with no guest screen. Own uv project; talks to the backend only over HTTP. |
-| `firmware/table_button_esp32/` | Arduino (esp32 core 3.x) | Mini ESP32: button D8, 16x2 LCD on D0-D5; USB serial 115200 + BLE Nordic UART (`Ding-XXXX`) |
+| `firmware/table_button_esp32/` | Arduino (esp32 core 3.x) | Mini ESP32: button D7, 16x2 LCD on D0-D5; USB serial 115200 + BLE Nordic UART (`Ding-XXXX`) |
 | `firmware/table_button/` | Arduino Uno | Legacy: button D2, LED D9, USB only; ignores `INFO:` |
 | `docs/API.md` | | **The contract** between backend and web. Change it together with the code. |
 | `docs/HARDWARE.md` | | Wiring, flashing, protocol, troubleshooting |

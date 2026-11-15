@@ -16,10 +16,10 @@
 #include <LiquidCrystal.h>
 
 // ------------------------------------------------------------------ pins
-// Pins are named by the board's silkscreen labels (D0..D8). If your board package does not
-// define D0..D8 ("'D0' was not declared in this scope"), set DING_USE_RAW_GPIO to 1 and put
+// Pins are named by the board's silkscreen labels (D0..D7). If your board package does not
+// define D0..D7 ("'D0' was not declared in this scope"), set DING_USE_RAW_GPIO to 1 and put
 // the GPIO numbers from your board's pinout below. Example, Seeed XIAO ESP32-C3:
-// D0=2 D1=3 D2=4 D3=5 D4=6 D5=7 D8=8. Seeed XIAO ESP32-S3: D0=1 D1=2 D2=3 D3=4 D4=5 D5=6 D8=7.
+// D0=2 D1=3 D2=4 D3=5 D4=6 D5=7 D7=20. Seeed XIAO ESP32-S3: D0=1 D1=2 D2=3 D3=4 D4=5 D5=6 D7=44.
 #ifndef DING_USE_RAW_GPIO
 #define DING_USE_RAW_GPIO 0
 #endif
@@ -31,7 +31,7 @@ const uint8_t PIN_LCD_D4 = 4;
 const uint8_t PIN_LCD_D5 = 5;
 const uint8_t PIN_LCD_D6 = 6;
 const uint8_t PIN_LCD_D7 = 7;
-const uint8_t PIN_BUTTON = 8;
+const uint8_t PIN_BUTTON = 20;
 #else
 const uint8_t PIN_LCD_RS = D0;
 const uint8_t PIN_LCD_E = D1;
@@ -39,7 +39,7 @@ const uint8_t PIN_LCD_D4 = D2;
 const uint8_t PIN_LCD_D5 = D3;
 const uint8_t PIN_LCD_D6 = D4;
 const uint8_t PIN_LCD_D7 = D5;
-const uint8_t PIN_BUTTON = D8;  // to GND, internal pull-up. Don't hold it while powering on.
+const uint8_t PIN_BUTTON = D7;  // to GND, internal pull-up
 #endif
 
 // ------------------------------------------------------------------ Bluetooth
