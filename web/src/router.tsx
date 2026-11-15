@@ -15,11 +15,11 @@ export const router = createBrowserRouter([
         path: '/dashboard',
         lazy: () => import('@/pages/dashboard/DashboardLayout').then((m) => ({ Component: m.DashboardLayout })),
         children: [
-          { index: true, lazy: () => import('@/pages/dashboard/OverviewPage').then((m) => ({ Component: m.OverviewPage })) },
+          { index: true, lazy: () => import('@/pages/dashboard/overview/OverviewPage').then((m) => ({ Component: m.OverviewPage })) },
           { path: 'menu', lazy: () => import('@/pages/dashboard/menu/MenuPage').then((m) => ({ Component: m.MenuPage })) },
           { path: 'knowledge', lazy: () => import('@/pages/dashboard/KnowledgePage').then((m) => ({ Component: m.KnowledgePage })) },
           { path: 'tables', lazy: () => import('@/pages/dashboard/TablesPage').then((m) => ({ Component: m.TablesPage })) },
-          { path: 'orders', lazy: () => import('@/pages/dashboard/OrdersPage').then((m) => ({ Component: m.OrdersPage })) },
+          { path: 'orders', lazy: () => import('@/pages/dashboard/orders/OrdersPage').then((m) => ({ Component: m.OrdersPage })) },
           {
             path: 'conversations',
             lazy: () => import('@/pages/dashboard/ConversationsPage').then((m) => ({ Component: m.ConversationsPage })),
@@ -28,6 +28,7 @@ export const router = createBrowserRouter([
             path: 'conversations/:sessionId',
             lazy: () => import('@/pages/dashboard/ConversationsPage').then((m) => ({ Component: m.ConversationsPage })),
           },
+          { path: 'playground', lazy: () => import('@/pages/dashboard/playground/PlaygroundPage').then((m) => ({ Component: m.PlaygroundPage })) },
           { path: 'settings', lazy: () => import('@/pages/dashboard/settings/SettingsPage').then((m) => ({ Component: m.SettingsPage })) },
         ],
       },

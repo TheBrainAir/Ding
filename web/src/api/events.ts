@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { QueryClient } from '@tanstack/react-query'
 import { EVENTS_URL } from './client'
 import { keys } from './queries'
@@ -17,6 +17,35 @@ export function subscribeDashboardEvents(listener: Listener): () => void {
 
 export function useDashboardEvent(listener: Listener) {
   useEffect(() => subscribeDashboardEvents(listener), [listener])
+}
+
+/** Live events received this browser session, newest first (feeds the Overview activity list). */
+export interface ReceivedEvent {
+  event: DashboardEvent
+  at: string
+  seq: number
+}
+const RECENT_LIMIT = 40
+let recent: ReceivedEvent[] = []
+let recentSeq = 0
+const recentListeners = new Set<() => void>()
+
+function remember(event: DashboardEvent) {
+  recent = [{ event, at: new Date().toISOString(), seq: ++recentSeq }, ...recent].slice(0, RECENT_LIMIT)
+  for (const l of recentListeners) l()
+}
+
+export function useRecentEvents(): ReceivedEvent[] {
+  return useSyncExternalStore(
+    (onChange) => {
+      recentListeners.add(onChange)
+      return () => {
+        recentListeners.delete(onChange)
+      }
+    },
+    () => recent,
+    () => recent,
+  )
 }
 
 function upsertById<T extends { id: number }>(list: T[] | undefined, item: T, prepend = true): T[] | undefined {
@@ -97,6 +126,7 @@ export function useDashboardEventStream(qc: QueryClient, enabled: boolean): Live
         }
         const event = { type: name, data } as DashboardEvent
         applyEventToCache(qc, event)
+        remember(event)
         for (const listener of listeners) listener(event)
       }
       source.addEventListener(name, handler)

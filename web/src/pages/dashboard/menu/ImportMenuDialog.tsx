@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { FileUp, Loader2, Trash2 } from 'lucide-react'
+import { CircleCheck, FileUp, Loader2, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
 import { keys, useMeta } from '@/api/queries'
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { AiMark, ToggleChips } from './TagPickers'
+import Stepper, { Step } from '@/components/reactbits/Stepper'
 
 interface Row {
   key: number
@@ -39,6 +40,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
   const [fileName, setFileName] = useState('')
   const [dragging, setDragging] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
+  const [savedCount, setSavedCount] = useState<number | null>(null)
 
   const read = useMutation({
     mutationFn: (file: File) => api.importMenu(file),
@@ -52,7 +54,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
     onSuccess: (saved) => {
       qc.invalidateQueries({ queryKey: keys.dishes })
       toast(`Added ${saved.length} ${saved.length === 1 ? 'dish' : 'dishes'} to the menu`)
-      onDone()
+      setSavedCount(saved.length)
     },
   })
 
@@ -81,7 +83,34 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
     )
   }
 
-  // Step 1: choose a file
+  // Step 4: saved
+  if (savedCount !== null) {
+    return (
+      <>
+        <DialogHeader className="px-7 pt-7">
+          <DialogTitle className="font-display text-xl">Menu imported</DialogTitle>
+          <DialogDescription>The waiter can offer these dishes straight away.</DialogDescription>
+        </DialogHeader>
+        <ImportSteps step={5} />
+        <div className="grid place-items-center gap-3 px-7 py-10 text-center">
+          <span className="grid size-14 place-items-center rounded-full bg-sage-soft text-bistro">
+            <CircleCheck className="size-7" aria-hidden />
+          </span>
+          <p className="font-display text-lg font-semibold">
+            Added {savedCount} {savedCount === 1 ? 'dish' : 'dishes'} from {fileName}
+          </p>
+          <p className="max-w-sm text-sm text-ink-soft">Dishes without a photo are flagged on the menu so you can add one later.</p>
+        </div>
+        <DialogFooter className="border-t border-line px-7 py-4">
+          <Button type="button" onClick={onDone}>
+            Done
+          </Button>
+        </DialogFooter>
+      </>
+    )
+  }
+
+  // Steps 1 and 2: choose a file, then AI reads it
   if (!rows) {
     return (
       <>
@@ -91,6 +120,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
             Upload a photo or PDF of your printed menu. AI reads the dishes, then you check every one before anything is saved.
           </DialogDescription>
         </DialogHeader>
+        <ImportSteps step={read.isPending ? 2 : 1} />
         <div className="px-7 py-7">
           <label
             htmlFor={`${uid}-file`}
@@ -137,7 +167,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
             }}
           />
           {read.error && (
-            <p role="alert" className="mt-4 rounded-xl bg-paprika-soft px-3 py-2 text-sm text-paprika-deep">
+            <p role="alert" className="mt-4 rounded-xl border border-input bg-linen-deep px-3 py-2 text-sm text-ink">
               Could not read that menu: {read.error.message}
             </p>
           )}
@@ -146,7 +176,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
     )
   }
 
-  // Step 2: review the drafts
+  // Step 3: review the drafts
   const allergens = meta.data?.allergens ?? []
   const tags = meta.data?.dietary_tags ?? []
   return (
@@ -159,6 +189,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
           <AiMark /> Read by AI — verify names, prices and especially allergens before saving.
         </DialogDescription>
       </DialogHeader>
+      <ImportSteps step={3} />
 
       <div className="flex-1 overflow-y-auto px-7 py-5">
         {rows.length === 0 && <p className="py-10 text-center text-ink-soft">No dishes were found in that file. Try a sharper photo.</p>}
@@ -171,7 +202,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
                 className={cn(
                   'rounded-[22px] border p-4 transition-opacity',
                   r.include ? 'border-line bg-paper' : 'border-dashed border-line bg-linen/50 opacity-60',
-                  bad && 'border-paprika',
+                  bad && 'border-2 border-saffron-deep',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -239,7 +270,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
                         onChange={(v) => update(r.key, { dietary_tags: v })}
                       />
                     </div>
-                    {bad && <p className="text-sm text-paprika">Add a name and a price, or untick this dish.</p>}
+                    {bad && <p className="text-sm font-semibold text-ink">Add a name and a price, or untick this dish.</p>}
                   </div>
                   <Button
                     type="button"
@@ -262,7 +293,7 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
           Use another file
         </Button>
         <div className="flex items-center gap-3">
-          {save.error && <p className="text-sm text-paprika">{save.error.message}</p>}
+          {save.error && <p className="text-sm font-semibold text-ink">{save.error.message}</p>}
           <Button type="button" onClick={submit} disabled={save.isPending || chosen.length === 0}>
             {save.isPending && <Loader2 className="animate-spin" aria-hidden />}
             Save {chosen.length} {chosen.length === 1 ? 'dish' : 'dishes'}
@@ -270,5 +301,37 @@ function ImportFlow({ onDone }: { onDone: () => void }) {
         </div>
       </DialogFooter>
     </>
+  )
+}
+
+/** Upload → Reading → Review → Saved, as a step indicator (the content lives below it). */
+function ImportSteps({ step }: { step: number }) {
+  return (
+    <div className="px-7 pt-4">
+      <Stepper
+        step={step}
+        showFooter={false}
+        disableStepIndicators
+        frame={false}
+        theme="light"
+        transition="none"
+        width="100%"
+        contentClassName="hidden"
+        style={
+          {
+            '--stepper-solid': 'var(--bistro)',
+            '--stepper-solid-ink': 'var(--paper)',
+            '--stepper-muted': 'var(--ink-soft)',
+            '--stepper-faint': 'var(--line)',
+            '--stepper-ink': 'var(--ink)',
+          } as React.CSSProperties
+        }
+      >
+        <Step title="Upload" />
+        <Step title="Reading" />
+        <Step title="Review" />
+        <Step title="Saved" />
+      </Stepper>
+    </div>
   )
 }

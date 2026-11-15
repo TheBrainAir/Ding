@@ -58,7 +58,7 @@ export function TablesPage() {
     <>
       <PageHeader
         title="Tables"
-        description="Each table has its own screen. Open it in Chrome on the laptop beside the button and connect the button from there."
+        description="Each table has its own screen. Open it in Chrome on the laptop beside the button, then use “Connect table button” on that screen to pair the button over USB or Bluetooth."
       />
 
       <form
@@ -82,7 +82,7 @@ export function TablesPage() {
           ))}
         </div>
       ) : tables.isError ? (
-        <p className="text-paprika">Could not load tables: {tables.error.message}</p>
+        <p>Could not load tables: {tables.error.message}</p>
       ) : tables.data.length === 0 ? (
         <EmptyState icon={<Armchair />} title="No tables yet">
           Add your first table above. You will get a link to its screen for the laptop next to the button.
@@ -206,11 +206,15 @@ function TableCard({ table }: { table: Table }) {
           </form>
         ) : (
           <div className="min-w-0">
-            <h2 className="truncate text-xl font-semibold">{table.label}</h2>
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-soft">
-              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                <span className={cn('size-2 rounded-full', active ? 'bg-saffron' : 'bg-line')} aria-hidden />
-                {active ? 'Guest at the table' : 'Free'}
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-semibold whitespace-nowrap',
+                  active ? 'bg-saffron-soft text-ink' : 'bg-linen-deep text-ink-soft',
+                )}
+              >
+                <span className={cn('size-2 rounded-full', active ? 'animate-pulse bg-saffron-deep motion-reduce:animate-none' : 'bg-input')} aria-hidden />
+                {active ? 'Guest talking' : 'Free'}
               </span>
               {active && (
                 <Link
@@ -222,6 +226,7 @@ function TableCard({ table }: { table: Table }) {
                 </Link>
               )}
             </p>
+            <h2 className="mt-2 truncate text-xl font-semibold">{table.label}</h2>
           </div>
         )}
         {!renaming && (
@@ -244,7 +249,7 @@ function TableCard({ table }: { table: Table }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Keep it</AlertDialogCancel>
-                  <AlertDialogAction className="bg-paprika hover:bg-paprika-deep" onClick={() => remove.mutate()}>
+                  <AlertDialogAction onClick={() => remove.mutate()}>
                     Delete table
                   </AlertDialogAction>
                 </AlertDialogFooter>

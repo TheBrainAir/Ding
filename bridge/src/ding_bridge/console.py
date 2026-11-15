@@ -83,10 +83,9 @@ class Console:
             self._line("  order: empty")
             return
         items = ", ".join(
-            f"{i['quantity']}x {i['name']}"
+            f"{i.get('quantity', 1)}x {i.get('name', '?')}"
             + (self._paint(" [ALLERGEN RISK ACCEPTED]", "red") if i.get("allergen_flag") else "")
             for i in order["items"]
         )
-        self._line(
-            f"  order #{order['id']} ({order['status']}): {items} = {order['total']:.2f} {order.get('currency', '')}"
-        )
+        total = f"{float(order.get('total') or 0):.2f} {order.get('currency', '')}".strip()
+        self._line(f"  order #{order.get('id', '?')} ({order.get('status', '?')}): {items} = {total}")

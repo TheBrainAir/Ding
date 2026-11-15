@@ -1,16 +1,31 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { BellRing, Cable, Keyboard, Loader2, RotateCcw, SendHorizontal, Unplug, Volume2 } from 'lucide-react'
+import {
+  BellRing,
+  Bluetooth,
+  BluetoothSearching,
+  Cable,
+  ChevronDown,
+  Keyboard,
+  Loader2,
+  RotateCcw,
+  SendHorizontal,
+  Unplug,
+  Usb,
+  Volume2,
+} from 'lucide-react'
 import { api, ApiError } from '@/api/client'
 import { keys } from '@/api/queries'
 import type { ButtonState } from '@/api/types'
 import { BellMark } from '@/components/brand/BellMark'
 import { VoiceOrb } from '@/components/orb/VoiceOrb'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { PRODUCT_NAME } from '@/config'
 import { languageName, nativeLanguageName } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import type { ButtonTransport } from '@/lib/voice'
 import { OrderPanel } from './OrderPanel'
 import { MentionedDishes } from './MentionedDishes'
 import { RotatingHint } from './RotatingHint'
@@ -142,7 +157,11 @@ function TableScreen({ token }: { token: string }) {
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {snap.language && <LanguageBadge code={snap.language} />}
-          <SerialControl snap={snap} onConnect={() => conversation.connectSerial()} onDisconnect={() => conversation.disconnectSerial()} />
+          <ButtonControl
+            snap={snap}
+            onConnect={(transport) => conversation.connectButton(transport)}
+            onDisconnect={() => conversation.disconnectButton()}
+          />
           <Button
             variant="ghost"
             size="sm"
@@ -170,7 +189,7 @@ function TableScreen({ token }: { token: string }) {
             <StatusLine state={snap.state} latched={snap.latched} persona={persona} voiceInput={voiceInput} />
             <Captions snap={snap} persona={persona} />
             {snap.notice && <NoticePill notice={snap.notice} onDismiss={() => conversation.dismissNotice()} />}
-            {snap.audioLocked && snap.serial === 'connected' && (
+            {snap.audioLocked && snap.button.status === 'connected' && (
               <p className="flex items-center gap-2 text-sm text-saffron">
                 <Volume2 className="size-4" aria-hidden />
                 Click anywhere on the screen once so {persona} can speak out loud.
@@ -336,42 +355,81 @@ function LanguageBadge({ code }: { code: string }) {
   )
 }
 
-function SerialControl({
+const TRANSPORT_LABEL: Record<ButtonTransport, string> = { usb: 'USB', bluetooth: 'Bluetooth' }
+
+function ButtonControl({
   snap,
   onConnect,
   onDisconnect,
 }: {
   snap: ConversationSnapshot
-  onConnect: () => void
+  onConnect: (transport: ButtonTransport) => void
   onDisconnect: () => void
 }) {
-  if (snap.serial === 'unsupported') {
+  const { status, transport, available } = snap.button
+  const quiet = 'text-linen hover:bg-white/10 hover:text-linen'
+
+  if (status === 'unsupported') {
     return (
-      <span className="text-xs text-linen/50" title="Web Serial needs Chrome or Edge on a laptop">
+      <span className="text-xs text-linen/50" title="The table button needs Web Serial or Web Bluetooth (Chrome or Edge on a laptop)">
         Table button needs Chrome
       </span>
     )
   }
-  if (snap.serial === 'connected') {
+  if (status === 'connected' && transport) {
     return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-linen hover:bg-white/10 hover:text-linen"
-        onClick={onDisconnect}
-        title="Disconnect the table button"
-      >
+      <Button variant="ghost" size="sm" className={quiet} onClick={onDisconnect} title="Disconnect the table button">
         <span className="size-2 rounded-full bg-[#7fd99a]" aria-hidden />
-        Button connected
+        Button · {TRANSPORT_LABEL[transport]}
         <Unplug className="opacity-60" aria-hidden />
       </Button>
     )
   }
+  if (status === 'reconnecting') {
+    return (
+      <Button variant="ghost" size="sm" className={quiet} onClick={onDisconnect} title="Stop reconnecting and disconnect">
+        <BluetoothSearching className="animate-pulse text-saffron" aria-hidden />
+        Button reconnecting…
+      </Button>
+    )
+  }
+  if (status === 'connecting') {
+    return (
+      <Button variant="accent" size="sm" disabled>
+        <Loader2 className="animate-spin" aria-hidden />
+        Connecting{transport ? ` (${TRANSPORT_LABEL[transport]})` : ''}…
+      </Button>
+    )
+  }
+  if (available.length === 1) {
+    const only = available[0]
+    return (
+      <Button variant="accent" size="sm" onClick={() => onConnect(only)}>
+        {only === 'usb' ? <Cable aria-hidden /> : <Bluetooth aria-hidden />}
+        Connect table button
+      </Button>
+    )
+  }
   return (
-    <Button variant="accent" size="sm" onClick={onConnect} disabled={snap.serial === 'connecting'}>
-      {snap.serial === 'connecting' ? <Loader2 className="animate-spin" aria-hidden /> : <Cable aria-hidden />}
-      Connect table button
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="accent" size="sm">
+          <Cable aria-hidden />
+          Connect table button
+          <ChevronDown className="opacity-70" aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => onConnect('usb')}>
+          <Usb aria-hidden />
+          USB cable
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onConnect('bluetooth')}>
+          <Bluetooth aria-hidden />
+          Bluetooth (battery box)
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

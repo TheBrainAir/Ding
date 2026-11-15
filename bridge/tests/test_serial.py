@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from ding_bridge.serial_link import SerialLink, candidate_ports
+from ding_bridge.serial_link import SerialLink, candidate_ports, lcd_text
 
 pytestmark = pytest.mark.skipif(os.name != "posix", reason="uses a pty")
 
@@ -75,6 +75,9 @@ def test_lines_states_unplug_and_replug():
 
         link.send_state("listening")
         assert board.received() == "STATE:listening\n"
+        link.send_info("Café 4 · Стол")
+        link.send_info("Café 4 · Стол")  # repeat: not sent again
+        assert board.received() == "INFO:Cafe 4 ? ????\n"
 
         board.unplug()
         current["path"] = None
@@ -85,7 +88,7 @@ def test_lines_states_unplug_and_replug():
         replugged = FakeBoard()
         current["path"] = replugged.path  # new port name after re-plug
         assert wait(lambda: statuses.count("connected") == 2)
-        assert "STATE:thinking" in replugged.received()
+        assert replugged.received() == "STATE:thinking\nINFO:Cafe 4 ? ????\n"  # screen restored
         replugged.send("PRESS\n")
         assert wait(lambda: lines[-1] == "PRESS")
     finally:
@@ -123,3 +126,9 @@ def test_candidate_ports_prefers_arduinos_and_skips_noise():
     assert candidate_ports(lambda: [port("/dev/ttyACM0", "ttyACM0")]) == ["/dev/ttyACM0"]
     assert candidate_ports(lambda: [port("/dev/cu.HC-05", "n/a")]) == ["/dev/cu.HC-05"]  # Bluetooth serial module
     assert candidate_ports(list) == []
+
+
+def test_lcd_text():
+    assert lcd_text("Crème brûlée for table twelve") == "Creme brulee for"
+    assert lcd_text("  Սեղան\t2 ") == "????? 2"
+    assert lcd_text("Pizza 🍕!") == "Pizza ?!"

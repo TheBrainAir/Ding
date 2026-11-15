@@ -1,14 +1,17 @@
 """USB serial link to the table button (docs/HARDWARE.md).
 
-board -> bridge: PRESS, RELEASE, READY        bridge -> board: STATE:idle|listening|thinking|speaking
+board -> bridge: PRESS, RELEASE, READY
+bridge -> board: STATE:idle|listening|thinking|speaking, INFO:<text> (LCD line 2, ASCII, 16 chars)
 
 A background thread keeps the link alive: if the board is unplugged it waits, looks for
 it again (the port name can change on re-plug) and re-sends the current light state.
 """
 
 import logging
+import re
 import threading
 import time
+import unicodedata
 from collections.abc import Callable
 
 log = logging.getLogger(__name__)
@@ -17,6 +20,23 @@ BAUD = 115200
 # USB vendor ids of Arduino boards and the usual USB-serial chips on clones.
 KNOWN_VIDS = {0x2341, 0x2A03, 0x1A86, 0x0403, 0x10C4, 0x239A, 0x1B4F, 0x16C0}
 _IGNORED = ("bluetooth", "debug-console", "wlan", "airpods")
+LCD_WIDTH = 16
+
+
+def lcd_text(text: str, width: int = LCD_WIDTH) -> str:
+    """What the 16x2 LCD can show: ASCII, accents stripped, one '?' per other character."""
+    decomposed = unicodedata.normalize("NFKD", text)
+    chars = []
+    for ch in decomposed:
+        if unicodedata.combining(ch):
+            continue
+        if ch.isspace():
+            chars.append(" ")
+        elif 0x20 <= ord(ch) < 0x7F:
+            chars.append(ch)
+        else:
+            chars.append("?")
+    return re.sub(r" +", " ", "".join(chars)).strip()[:width].rstrip()
 
 
 def candidate_ports(comports: Callable[[], list] | None = None) -> list[str]:
@@ -69,6 +89,7 @@ class SerialLink:
         self._open_port = open_port or self._default_open
         self._serial = None
         self._state = "idle"
+        self._info = ""
         self._write_lock = threading.Lock()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -98,8 +119,19 @@ class SerialLink:
         self._state = state
         self._write(f"STATE:{state}\n")
 
+    def send_info(self, text: str) -> None:
+        """LCD line 2 of the ESP32 box (the old Uno sketch ignores it). Repeats are skipped."""
+        info = lcd_text(text)
+        if not info or info == self._info:
+            return
+        self._info = info
+        self._write(f"INFO:{info}\n")
+
     def resend_state(self) -> None:
+        """After (re)connecting or a READY from the board: it shows nothing of ours."""
         self._write(f"STATE:{self._state}\n")
+        if self._info:
+            self._write(f"INFO:{self._info}\n")
 
     def _write(self, text: str) -> None:
         with self._write_lock:

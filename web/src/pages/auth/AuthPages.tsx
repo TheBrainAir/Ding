@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
@@ -7,20 +7,27 @@ import { keys } from '@/api/queries'
 import type { ButtonState, MeResponse } from '@/api/types'
 import { Wordmark } from '@/components/brand/BellMark'
 import { VoiceOrb } from '@/components/orb/VoiceOrb'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import RotatingText from '@/components/reactbits/RotatingText'
+import StarBorder from '@/components/reactbits/StarBorder'
 import { PRODUCT_NAME } from '@/config'
 
-const DEMO: { state: ButtonState; text: string; lang: string; ms: number }[] = [
-  { state: 'idle', text: 'Press the button and speak in your language', lang: 'en', ms: 2600 },
-  { state: 'listening', text: '“¿Tenéis algo sin gluten?”', lang: 'es', ms: 2400 },
-  { state: 'thinking', text: 'Checking the menu…', lang: 'en', ms: 1500 },
-  { state: 'speaking', text: '“Sí: el risotto y la ensalada de burrata no llevan gluten.”', lang: 'es', ms: 3400 },
-  { state: 'listening', text: '“Ի՞նչ աղանդեր ունեք։”', lang: 'hy', ms: 2400 },
-  { state: 'thinking', text: 'Checking the menu…', lang: 'en', ms: 1500 },
-  { state: 'speaking', text: '“Ունենք տիրամիսու և պիստակով պաղպաղակ։”', lang: 'hy', ms: 3400 },
+const DEMO: { state: ButtonState; ms: number }[] = [
+  { state: 'idle', ms: 2600 },
+  { state: 'listening', ms: 2200 },
+  { state: 'thinking', ms: 1400 },
+  { state: 'speaking', ms: 3000 },
 ]
+
+/** Languages the waiter answers in, for the rotating line. */
+const LANGUAGES = ['Spanish', 'Armenian', 'Japanese', 'Arabic', 'Russian', 'Hindi', 'French', 'Korean', 'Portuguese']
+
+const Threads = lazy(() => import('@/components/reactbits/Threads'))
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
 function DemoOrb() {
   const [step, setStep] = useState(0)
@@ -28,34 +35,59 @@ function DemoOrb() {
     const id = setTimeout(() => setStep((s) => (s + 1) % DEMO.length), DEMO[step].ms)
     return () => clearTimeout(id)
   }, [step])
-  const current = DEMO[step]
   return (
-    <div className="flex flex-col items-center" aria-hidden>
-      <div className="pointer-events-none">
-        <VoiceOrb state={current.state} onPressStart={() => {}} onPressEnd={() => {}} label="" disabled size="min(28vmin, 260px)" />
-      </div>
-      <p key={step} lang={current.lang} className="-mt-2 min-h-[3.5em] max-w-sm text-center text-lg text-linen/85 animate-in fade-in-0 duration-500">
-        {current.text}
-      </p>
+    <div className="pointer-events-none flex justify-center" aria-hidden>
+      <VoiceOrb state={DEMO[step].state} onPressStart={() => {}} onPressEnd={() => {}} label="" disabled size="min(26vmin, 240px)" />
     </div>
   )
 }
 
+function SpeaksLine({ className }: { className?: string }) {
+  return (
+    <p className={className}>
+      <span className="sr-only">{PRODUCT_NAME} speaks your guests’ languages, for example {LANGUAGES.slice(0, 4).join(', ')}.</span>
+      <span aria-hidden className="inline-flex flex-wrap items-baseline gap-x-2">
+        {PRODUCT_NAME} speaks
+        <RotatingText
+          texts={LANGUAGES}
+          rotationInterval={2200}
+          staggerDuration={0.02}
+          mainClassName="inline-flex overflow-hidden rounded-xl bg-saffron px-2.5 py-0.5 text-ink"
+          splitLevelClassName="overflow-hidden"
+          transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+        />
+      </span>
+    </p>
+  )
+}
+
 function AuthShell({ title, subtitle, children }: { title: string; subtitle: ReactNode; children: ReactNode }) {
+  const [still] = useState(prefersReducedMotion)
   return (
     <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
       <aside
-        className="relative hidden flex-col justify-between overflow-hidden p-10 text-linen lg:flex"
+        className="relative isolate hidden flex-col justify-between overflow-hidden p-10 text-linen lg:flex"
         style={{ background: 'radial-gradient(900px 700px at 50% 45%, #1f4a39 0%, var(--bistro-deep) 50%, var(--bistro-night) 100%)' }}
       >
+        <div className="absolute inset-0 -z-10 opacity-60" aria-hidden>
+          <Suspense fallback={null}>
+            <Threads color="#f2a93b" accentColor="#fce9c6" amplitude={1.1} distance={0.3} lineCount={36} thickness={0.5} speed={0.25} opacity={0.55} paused={still} />
+          </Suspense>
+        </div>
         <Wordmark onDark />
         <DemoOrb />
-        <p className="max-w-md font-display text-xl leading-snug font-medium">
-          A voice waiter for every table. Guests press a button and talk in their own language. It always asks about allergies.
-        </p>
+        <div className="grid gap-4">
+          <SpeaksLine className="font-display text-2xl leading-snug font-semibold" />
+          <p className="max-w-md text-lg text-linen/80">
+            A voice waiter for every table. Guests press a button and talk in their own language. It always asks about allergies.
+          </p>
+        </div>
       </aside>
       <main className="flex flex-col px-6 py-8 sm:px-12">
-        <Wordmark className="lg:hidden" />
+        <div className="lg:hidden">
+          <Wordmark />
+          <SpeaksLine className="mt-3 font-display text-lg font-semibold" />
+        </div>
         <div className="m-auto w-full max-w-sm py-10">
           <h1 className="text-[1.75rem] font-semibold">{title}</h1>
           <p className="mt-1.5 text-ink-soft">{subtitle}</p>
@@ -63,6 +95,29 @@ function AuthShell({ title, subtitle, children }: { title: string; subtitle: Rea
         </div>
       </main>
     </div>
+  )
+}
+
+/** The page's one primary action, with a slow saffron star running round its border. */
+function PrimarySubmit({ pending, children }: { pending: boolean; children: ReactNode }) {
+  return (
+    <StarBorder
+      as="button"
+      type="submit"
+      disabled={pending}
+      className="mt-2 w-full text-base font-semibold"
+      color="#f2a93b"
+      trailColor="#fce9c6"
+      backgroundColor="var(--bistro)"
+      textColor="var(--paper)"
+      borderColor="rgba(242, 169, 59, 0.35)"
+      radius={999}
+      thickness={2}
+      duration={5}
+    >
+      {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
+      {children}
+    </StarBorder>
   )
 }
 
@@ -81,7 +136,7 @@ function useAuthSuccess() {
 function FormError({ error }: { error: Error | null }) {
   if (!error) return null
   return (
-    <p role="alert" className="rounded-xl bg-paprika-soft px-3 py-2 text-sm text-paprika-deep">
+    <p role="alert" className="rounded-xl border border-input bg-linen-deep px-3 py-2 text-sm text-ink">
       {error.message}
     </p>
   )
@@ -117,10 +172,7 @@ export function LoginPage() {
           />
         </div>
         <FormError error={login.error} />
-        <Button type="submit" size="lg" disabled={login.isPending} className="mt-2">
-          {login.isPending && <Loader2 className="animate-spin" aria-hidden />}
-          Log in
-        </Button>
+        <PrimarySubmit pending={login.isPending}>Log in</PrimarySubmit>
         <p className="text-sm text-ink-soft">
           New here?{' '}
           <Link to="/signup" className="font-semibold text-ink underline underline-offset-4">
@@ -169,10 +221,7 @@ export function SignupPage() {
           <p className="text-xs text-ink-soft">At least 8 characters.</p>
         </div>
         <FormError error={signup.error} />
-        <Button type="submit" size="lg" disabled={signup.isPending} className="mt-2">
-          {signup.isPending && <Loader2 className="animate-spin" aria-hidden />}
-          Create account
-        </Button>
+        <PrimarySubmit pending={signup.isPending}>Create account</PrimarySubmit>
         <p className="text-sm text-ink-soft">
           Already have an account?{' '}
           <Link to="/login" className="font-semibold text-ink underline underline-offset-4">

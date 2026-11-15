@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BookOpen, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -6,23 +7,44 @@ import { api } from '@/api/client'
 import { keys } from '@/api/queries'
 import type { KnowledgeItem } from '@/api/types'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { timeAgo } from '@/lib/format'
 
-const STARTERS: { title: string; hint: string }[] = [
+/** Quick-add templates: the questions guests ask most. The content is a prompt, not filled in. */
+const TEMPLATES: { title: string; hint: string }[] = [
   { title: 'Opening hours', hint: 'Mon–Fri 12:00–23:00, weekends 11:00–00:00. Kitchen closes 30 minutes earlier.' },
-  { title: 'Wi-Fi', hint: 'Network name and password.' },
-  { title: 'Payment', hint: 'Cards, cash, splitting the bill, service charge.' },
+  { title: 'Wi-Fi', hint: 'Network: …  Password: …' },
+  { title: 'Parking', hint: 'Where guests can park, how much it costs, the nearest garage.' },
+  { title: 'Payment methods', hint: 'Cards, cash, contactless, splitting the bill, service charge.' },
   { title: 'Children and pets', hint: 'High chairs, kids’ portions, dogs on the terrace.' },
-  { title: 'Today’s specials', hint: 'What the kitchen recommends today.' },
 ]
 
 export function KnowledgePage() {
   const items = useQuery({ queryKey: keys.knowledge, queryFn: api.knowledge })
+  const [params, setParams] = useSearchParams()
   const [draft, setDraft] = useState<{ title: string; content: string; hint?: string } | null>(null)
+  // ?new=1 from the command palette opens an empty note.
+  const shownDraft = draft ?? (params.get('new') === '1' ? { title: '', content: '' } : null)
+  const closeDraft = () => {
+    setDraft(null)
+    if (params.get('new')) setParams({}, { replace: true })
+  }
+  const existing = new Set((items.data ?? []).map((i) => i.title.trim().toLowerCase()))
+  const templates = TEMPLATES.filter((t) => !existing.has(t.title.toLowerCase()))
 
   return (
     <>
@@ -30,7 +52,7 @@ export function KnowledgePage() {
         title="Knowledge"
         description="Facts about the restaurant the waiter can answer from: hours, Wi-Fi, payment, house rules. Keep each note short and specific."
         actions={
-          <Button onClick={() => setDraft({ title: '', content: '' })} disabled={!!draft}>
+          <Button onClick={() => setDraft({ title: '', content: '' })} disabled={!!shownDraft}>
             <Plus aria-hidden />
             Add note
           </Button>
@@ -38,22 +60,32 @@ export function KnowledgePage() {
       />
 
       <div className="grid max-w-3xl gap-4">
-        {draft && <NoteEditor initial={draft} onClose={() => setDraft(null)} />}
+        {templates.length > 0 && !shownDraft && (
+          <div className="flex flex-wrap items-center gap-2" aria-label="Quick add">
+            <span className="text-sm text-ink-soft">Quick add:</span>
+            {templates.map((t) => (
+              <Button key={t.title} variant="outline" size="sm" onClick={() => setDraft({ title: t.title, content: '', hint: t.hint })}>
+                <Plus aria-hidden />
+                {t.title}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {shownDraft && <NoteEditor initial={shownDraft} onClose={closeDraft} />}
 
         {items.isPending ? (
           Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-28 rounded-[24px]" />)
         ) : items.isError ? (
-          <p className="text-paprika">Could not load notes: {items.error.message}</p>
-        ) : items.data.length === 0 && !draft ? (
+          <div className="rounded-[24px] border border-line bg-paper p-5">
+            <p>Could not load notes: {items.error.message}</p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => items.refetch()}>
+              Try again
+            </Button>
+          </div>
+        ) : items.data.length === 0 && !shownDraft ? (
           <EmptyState icon={<BookOpen />} title="No notes yet">
-            Start with one of these, so guests get a real answer instead of “I’ll ask a colleague”.
-            <span className="mt-4 flex flex-wrap justify-center gap-2">
-              {STARTERS.map((s) => (
-                <Button key={s.title} variant="outline" size="sm" onClick={() => setDraft({ title: s.title, content: '', hint: s.hint })}>
-                  {s.title}
-                </Button>
-              ))}
-            </span>
+            Pick one of the quick-add notes above, so guests get a real answer instead of “I’ll ask a colleague”.
           </EmptyState>
         ) : (
           items.data.map((item) => <NoteCard key={item.id} item={item} />)
@@ -141,16 +173,23 @@ function NoteCard({ item }: { item: KnowledgeItem }) {
           <Button variant="ghost" size="icon-sm" aria-label={`Edit ${item.title}`} onClick={() => setEditing(true)}>
             <Pencil aria-hidden />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Delete ${item.title}`}
-            onClick={() => {
-              if (window.confirm(`Delete “${item.title}”?`)) remove.mutate()
-            }}
-          >
-            <Trash2 aria-hidden />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label={`Delete ${item.title}`}>
+                <Trash2 aria-hidden />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete “{item.title}”?</AlertDialogTitle>
+                <AlertDialogDescription>The waiter stops using this note straight away.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep it</AlertDialogCancel>
+                <AlertDialogAction onClick={() => remove.mutate()}>Delete note</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       <p className="mt-1.5 whitespace-pre-line text-ink-soft">{item.content}</p>

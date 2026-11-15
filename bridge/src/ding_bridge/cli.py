@@ -45,7 +45,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
 async def startup_checks(args: argparse.Namespace, console: Console):
     """Check everything up front and report every problem at once.
 
-    Returns (exit_code, backend, player, input_device, port)."""
+    Returns (exit_code, backend, player, input_device, table_label)."""
     code = 0
 
     def fail(c: int, message: str) -> None:
@@ -124,8 +124,8 @@ async def startup_checks(args: argparse.Namespace, console: Console):
         if player is not None:
             player.close()
         await backend.aclose()
-        return code, None, None, None, None
-    return 0, backend, player, input_device, port
+        return code, None, None, None, ""
+    return 0, backend, player, input_device, (table or {}).get("table_label", "")
 
 
 def _read_stdin(bridge: Bridge, keyboard: bool) -> None:
@@ -157,7 +157,7 @@ async def run(args: argparse.Namespace) -> int:
     console = Console(verbose=args.verbose)
     console.info(f"Ding bridge for table {args.table}")
     # The link auto-detects on its own (a re-plugged board can come back under a new name).
-    code, backend, player, input_device, _port = await startup_checks(args, console)
+    code, backend, player, input_device, table_label = await startup_checks(args, console)
     if code:
         console.error("cannot start, see FAIL above")
         return code
@@ -167,6 +167,7 @@ async def run(args: argparse.Namespace) -> int:
         player,
         audio.Recorder(input_device),
         console=console,
+        table_label=table_label,
         tap_ms=args.tap_ms,
         max_seconds=args.max_seconds,
     )

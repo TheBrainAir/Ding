@@ -163,14 +163,22 @@ Response is `application/x-ndjson`, streamed: one JSON object per line, in this 
 Body: raw `audio/wav`. Response: one `audio/mpeg` body (the whole reply), with headers
 `X-Waiter-Transcript` and `X-Waiter-Reply` (URL-encoded). `204` when nothing was heard.
 
-## Table button serial protocol (Web Serial, 115200 baud, newline-terminated)
+## Table button protocol (USB serial or Bluetooth LE, newline-terminated)
 
-- Arduino → browser: `PRESS`, `RELEASE`
-- Browser → Arduino: `STATE:idle` | `STATE:listening` | `STATE:thinking` | `STATE:speaking`
+The same lines run over Web Serial (115200 baud) and over Bluetooth LE (Nordic UART Service:
+service `6E400001-B5A3-F393-E0A9-E50E24DCCA9E`, host writes to RX `6E400002-…`, board notifies on TX
+`6E400003-…`; the box advertises as `Ding-XXXX`). Unknown lines are ignored on both sides.
 
-The headless bridge (`bridge/`, `ding-bridge --table <token>`) speaks the same protocol over plain
-USB serial (or a Bluetooth serial port) in place of the browser. It also sends `STATE:...` again
-after the board prints `READY` or is re-plugged.
+- Board → host: `PRESS`, `RELEASE`, `READY` (after boot, and about a second after a Bluetooth host
+  connects; the host answers with its current `STATE` and `INFO`)
+- Host → board: `STATE:idle` | `STATE:listening` | `STATE:thinking` | `STATE:speaking` (LCD line 1)
+- Host → board: `INFO:<text>` (LCD line 2; ASCII, 16 characters shown, other characters become `?`).
+  The guest screen sends the table label, `N items $X` for a draft order, or `Order sent` once placed.
+  The legacy Uno sketch ignores it.
+
+The headless bridge (`bridge/`, `ding-bridge --table <token>`) speaks the same protocol over USB
+serial in place of the browser and re-sends `STATE` / `INFO` after `READY` or a re-plug.
+Wiring and firmware: `docs/HARDWARE.md`.
 
 ## Backend implementation notes
 

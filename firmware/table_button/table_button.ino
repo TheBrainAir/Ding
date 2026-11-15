@@ -1,5 +1,8 @@
 // Ding table button: reference sketch for Arduino Uno R3.
 //
+// LEGACY: the current box is firmware/table_button_esp32 (ESP32 + LCD, USB + Bluetooth).
+// This sketch speaks the same protocol and simply ignores INFO: lines.
+//
 // The board is only the button and the light. Sound goes through the laptop the
 // board is plugged into: the browser on the table screen talks to the board over
 // Web Serial (USB, 115200 baud, newline-terminated lines).

@@ -9,7 +9,7 @@ import httpx
 import numpy as np
 import pytest
 
-from ding_bridge.app import Bridge, OrderedChunks
+from ding_bridge.app import Bridge, OrderedChunks, info_line
 from ding_bridge.backend import Backend
 from ding_bridge.console import Console
 
@@ -56,9 +56,14 @@ class FakeLink:
 
     def __init__(self) -> None:
         self.states: list[str] = []
+        self.infos: list[str] = []
 
     def send_state(self, s: str) -> None:
         self.states.append(s)
+
+    def send_info(self, text: str) -> None:
+        if not self.infos or self.infos[-1] != text:
+            self.infos.append(text)
 
     def resend_state(self) -> None:
         pass
@@ -128,6 +133,7 @@ async def rig():
         player,
         recorder,
         link=link,
+        table_label="Table 4",
         console=Console(stream=io.StringIO()),
         tap_ms=50,
         tick_after=0.05,
@@ -306,3 +312,26 @@ def test_ordered_chunks():
     assert o.add(0, "dup") == []
     assert o.add(3, "d") == []
     assert o.flush() == ["d"]
+
+
+async def test_lcd_info_follows_the_order(rig):
+    items = [{"name": "Pad Thai", "quantity": 2, "allergen_flag": False}, {"name": "Tea", "quantity": 1}]
+    draft = {"id": 7, "status": "draft", "items": items, "total": 29.0, "currency": "USD"}
+    placed = {**draft, "status": "placed"}
+    for turns, order in enumerate((draft, placed), start=1):
+        rig["server"].scripts.append([TRANSCRIPT, audio_event(0, 1), {**STATE, "order": order}, {"type": "done"}])
+        await hold(rig["bridge"])
+        await until(lambda n=turns: rig["bridge"].state == "idle" and len(rig["bridge"].history) == n)
+    rig["bridge"].post("reset")
+    await until(lambda: rig["server"].resets == 1)
+    assert rig["link"].infos == ["Table 4", "3 items $29.00", "Order sent", "Table 4"]
+
+
+def test_info_line_rules():
+    assert info_line(None, "Терраса 2") == "??????? 2"
+    assert (
+        info_line({"status": "draft", "items": [{"quantity": 2}], "total": 29, "currency": "EUR"}, "T")
+        == "2 items 29 EUR"
+    )
+    assert info_line({"status": "served", "items": [{"quantity": 1}], "total": 9}, "T") == "Enjoy your meal"
+    assert info_line({"status": "cancelled", "items": [{"quantity": 1}], "total": 9}, "Table 4") == "Table 4"

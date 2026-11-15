@@ -18,6 +18,7 @@ from ding_bridge import audio, earcons
 from ding_bridge.backend import BackendError
 from ding_bridge.console import Console
 from ding_bridge.press import TAP_THRESHOLD_MS, PressController
+from ding_bridge.serial_link import LCD_WIDTH, lcd_text
 
 
 class State(StrEnum):
@@ -25,6 +26,31 @@ class State(StrEnum):
     LISTENING = "listening"
     THINKING = "thinking"
     SPEAKING = "speaking"
+
+
+_DOLLAR = {"USD", "CAD", "AUD", "NZD", "SGD", "HKD", "MXN"}
+
+
+def info_line(order: dict | None, table_label: str) -> str:
+    """LCD line 2, same rules as the guest screen: label, "N items $X", or where the order is."""
+    label = lcd_text(table_label) or "Ding"
+    if not order or not order.get("items"):
+        return label
+    status = order.get("status")
+    if status == "draft":
+        count = sum(int(i.get("quantity", 1)) for i in order["items"])
+        items = f"{count} item{'' if count == 1 else 's'}"
+        total, currency = float(order.get("total", 0)), str(order.get("currency", "")).upper()
+
+        def money(cents: bool) -> str:
+            amount = f"{total:.2f}" if cents else str(round(total))
+            return f"${amount}" if currency in _DOLLAR else f"{amount} {currency}"
+
+        for line in (f"{items} {money(True)}", f"{items} {money(False)}", f"{items} {round(total)}", items):
+            if len(line) <= LCD_WIDTH:
+                return lcd_text(line)
+        return items
+    return {"placed": "Order sent", "preparing": "Being prepared", "served": "Enjoy your meal"}.get(status, label)
 
 
 class OrderedChunks:
@@ -78,8 +104,10 @@ class Bridge:
         tick_after: float = 1.5,
         tick_every: float = 1.5,
         decode=audio.decode,
+        table_label: str = "",
     ) -> None:
         self.backend = backend
+        self.table_label = table_label
         self.player = player
         self.recorder = recorder
         self.link = link
@@ -122,6 +150,7 @@ class Bridge:
         self._events = asyncio.Queue()
         self._running = True
         self._set_state(State.IDLE, force=True)
+        self._send_info(None)
         while self._running:
             kind, args = await self._events.get()
             await self.handle(kind, *args)
@@ -172,6 +201,10 @@ class Bridge:
         self.console.state(state.value)
         if self.link is not None:
             self.link.send_state(state.value)
+
+    def _send_info(self, order: dict | None) -> None:
+        if self.link is not None and hasattr(self.link, "send_info"):
+            self.link.send_info(info_line(order, self.table_label))
 
     def earcon(self, name: str) -> None:
         self.player.play(earcons.ALL[name](self.player.sample_rate))
@@ -234,6 +267,7 @@ class Bridge:
         try:
             await self.backend.reset()
             self.console.ok("table reset: the next press starts a new guest")
+            self._send_info(None)
         except BackendError as e:
             self.console.error(f"reset failed: {e}")
 
@@ -304,6 +338,7 @@ class Bridge:
         self.console.end_inline()
         if result.state:
             self.console.turn_state(result.state)
+            self._send_info(result.state.get("order"))
         for reason in result.waiter_called:
             self.console.warn(f"staff called to the table: {reason}")
         if result.error:

@@ -3,6 +3,7 @@ import type { ButtonState, Dish, GuestAllergies, Order, TableInfo, TurnEvent } f
 import { MAX_RECORDING_MS, TAP_THRESHOLD_MS } from '@/config'
 import {
   AudioQueuePlayer,
+  BluetoothButton,
   PressController,
   Recorder,
   SerialButton,
@@ -12,12 +13,52 @@ import {
   isAbortError,
   streamTurn,
   unlockAudio,
+  type ButtonLink,
+  type ButtonLinkStatus,
+  type ButtonTransport,
   type MicError,
   type TurnInput,
 } from '@/lib/voice'
+import { buttonInfoLine } from './buttonInfo'
 
 export type MicStatus = 'unknown' | 'ready' | MicError
-export type SerialStatus = 'unsupported' | 'disconnected' | 'connecting' | 'connected'
+export type ButtonStatus = 'unsupported' | ButtonLinkStatus
+
+/** The physical table button: which transport is in use and how the link is doing. */
+export interface ButtonSnapshot {
+  status: ButtonStatus
+  /** Set while connecting / connected / reconnecting. */
+  transport: ButtonTransport | null
+  /** What this browser can do: Web Serial (USB cable) and/or Web Bluetooth. */
+  available: ButtonTransport[]
+}
+
+const REMEMBER_KEY = 'ding.tableButton.transport'
+
+function rememberTransport(transport: ButtonTransport | null) {
+  try {
+    if (transport) localStorage.setItem(REMEMBER_KEY, transport)
+    else localStorage.removeItem(REMEMBER_KEY)
+  } catch {
+    /* storage unavailable: just no prompt-free reconnect */
+  }
+}
+
+function rememberedTransport(): ButtonTransport | null {
+  try {
+    const value = localStorage.getItem(REMEMBER_KEY)
+    return value === 'usb' || value === 'bluetooth' ? value : null
+  } catch {
+    return null
+  }
+}
+
+function initialButton(): ButtonSnapshot {
+  const available: ButtonTransport[] = []
+  if (SerialButton.isSupported()) available.push('usb')
+  if (BluetoothButton.isSupported()) available.push('bluetooth')
+  return { status: available.length ? 'disconnected' : 'unsupported', transport: null, available }
+}
 
 export interface Notice {
   kind: 'info' | 'error' | 'staff'
@@ -40,7 +81,7 @@ export interface ConversationSnapshot {
   /** A short tap latched recording on; the next press sends. */
   latched: boolean
   mic: MicStatus
-  serial: SerialStatus
+  button: ButtonSnapshot
   audioLocked: boolean
   voiceEnabled: boolean
 }
@@ -60,7 +101,7 @@ function initialSnapshot(): ConversationSnapshot {
     notice: null,
     latched: false,
     mic: canRecord() ? 'unknown' : 'unsupported',
-    serial: SerialButton.isSupported() ? 'disconnected' : 'unsupported',
+    button: initialButton(),
     audioLocked: true,
     voiceEnabled: false,
   }
@@ -69,7 +110,7 @@ function initialSnapshot(): ConversationSnapshot {
 /**
  * Everything the guest screen does, independent of React: push-to-talk from
  * three sources, one streamed turn at a time, barge-in, gapless playback and
- * the serial button's lights. The page renders `getSnapshot()`.
+ * the table button's display (USB cable or Bluetooth). The page renders `getSnapshot()`.
  */
 export class TableConversation {
   readonly token: string
@@ -78,7 +119,12 @@ export class TableConversation {
   private recorder = new Recorder()
   private player: AudioQueuePlayer
   private press: PressController
-  private serial: SerialButton
+  private links: Record<ButtonTransport, ButtonLink>
+  /** The transport the user chose (its status says whether it is up). */
+  private link: ButtonLink | null = null
+  /** True while we close a link ourselves, so it is not reported as "unplugged". */
+  private closingLink = false
+  private tableLabel = ''
   private abort: AbortController | null = null
   private turnId = 0
   private voiceExpected = false
@@ -100,11 +146,12 @@ export class TableConversation {
       startRecording: () => this.startListening(),
       stopRecording: () => void this.finishListening(),
     })
-    this.serial = new SerialButton({
+    const callbacks = (transport: ButtonTransport) => ({
       onPress: () => this.pressStart(),
       onRelease: () => this.pressEnd(),
-      onDisconnect: () => this.set({ serial: 'disconnected', notice: { kind: 'info', text: 'The table button was unplugged.' } }),
+      onStatus: (status: ButtonLinkStatus) => this.onLinkStatus(transport, status),
     })
+    this.links = { usb: new SerialButton(callbacks('usb')), bluetooth: new BluetoothButton(callbacks('bluetooth')) }
   }
 
   // ---- store plumbing (useSyncExternalStore) ----
@@ -121,7 +168,7 @@ export class TableConversation {
   private set(patch: Partial<ConversationSnapshot>) {
     const prev = this.snap
     this.snap = { ...prev, ...patch }
-    if (patch.state && patch.state !== prev.state) void this.serial.sendState(patch.state)
+    this.syncButton()
     if (patch.notice !== undefined && patch.notice !== prev.notice) this.scheduleNoticeDismiss(patch.notice)
     for (const l of this.listeners) l()
   }
@@ -151,6 +198,7 @@ export class TableConversation {
 
   /** Apply what GET /api/table/{token} says. Seeds the screen once per guest. */
   configure(info: TableInfo) {
+    this.tableLabel = info.table_label
     const patch: Partial<ConversationSnapshot> = { voiceEnabled: info.voice_enabled }
     if (!this.seeded) {
       this.seeded = true
@@ -173,14 +221,7 @@ export class TableConversation {
 
   attach() {
     this.refreshAudioLock()
-    if (SerialButton.isSupported() && !this.serial.connected) {
-      void this.serial.reconnectKnown().then((ok) => {
-        if (ok) {
-          this.set({ serial: 'connected' })
-          void this.serial.sendState(this.snap.state)
-        }
-      })
-    }
+    if (!this.link) void this.reconnectRememberedButton()
   }
 
   detach() {
@@ -188,8 +229,12 @@ export class TableConversation {
     this.recorder.dispose()
     this.press.reset()
     this.clearTimers()
-    void this.serial.disconnect()
-    this.set({ state: 'idle', latched: false, serial: SerialButton.isSupported() ? 'disconnected' : 'unsupported' })
+    this.closingLink = true
+    void Promise.all([this.links.usb.disconnect(), this.links.bluetooth.disconnect()]).finally(() => {
+      this.closingLink = false
+    })
+    this.link = null
+    this.set({ state: 'idle', latched: false, button: initialButton() })
   }
 
   private clearTimers() {
@@ -207,7 +252,7 @@ export class TableConversation {
     if (locked !== this.snap.audioLocked) this.set({ audioLocked: locked })
   }
 
-  // ---- press sources: pointer, space bar, serial ----
+  // ---- press sources: pointer, space bar, table button ----
 
   pressStart = () => {
     this.unlock()
@@ -220,29 +265,108 @@ export class TableConversation {
     this.set({ latched: this.press.isLatched })
   }
 
-  async connectSerial() {
+  // ---- the table button (USB cable or Bluetooth) ----
+
+  /** Tell the button what to show: state on LCD line 1 (or the Uno's LED), info on line 2. */
+  private syncButton() {
+    const link = this.link
+    if (!link?.connected) return
+    void link.sendState(this.snap.state)
+    void link.sendInfo(buttonInfoLine(this.snap.order, this.tableLabel))
+  }
+
+  private onLinkStatus(transport: ButtonTransport, status: ButtonLinkStatus) {
+    if (this.link !== this.links[transport]) return // not the button in use
+    const prev = this.snap.button.status
+    let notice: Notice | null | undefined
+    if (status === 'reconnecting') {
+      notice = { kind: 'info', text: 'The table button lost its Bluetooth link. Reconnecting…' }
+    } else if (status === 'connected' && prev === 'reconnecting') {
+      notice = { kind: 'info', text: 'The table button is back.' }
+    } else if (status === 'disconnected' && !this.closingLink && (prev === 'connected' || prev === 'reconnecting')) {
+      notice = {
+        kind: 'info',
+        text: transport === 'usb' ? 'The table button was unplugged.' : 'The table button disconnected.',
+      }
+    }
+    const button: ButtonSnapshot = {
+      ...this.snap.button,
+      status,
+      transport: status === 'disconnected' ? null : transport,
+    }
+    this.set(notice === undefined ? { button } : { button, notice })
+  }
+
+  /** On page load: reopen the button used last time, without a prompt, if the browser allows. */
+  private async reconnectRememberedButton() {
+    const last = rememberedTransport()
+    if (!last) return
+    const order: ButtonTransport[] = last === 'bluetooth' ? ['bluetooth', 'usb'] : ['usb', 'bluetooth']
+    for (const transport of order) {
+      if (!this.snap.button.available.includes(transport)) continue
+      const link = this.links[transport]
+      this.link = link
+      const ok = await link.reconnectKnown().catch(() => false)
+      if (this.link !== link) return // the user connected something else meanwhile
+      if (ok) {
+        this.syncButton()
+        return
+      }
+    }
+    if (this.link && !this.link.connected) this.link = null
+  }
+
+  async connectButton(transport: ButtonTransport) {
     this.unlock()
-    this.set({ serial: 'connecting' })
+    const link = this.links[transport]
+    const previous = this.link
+    if (previous && previous !== link) {
+      this.closingLink = true
+      try {
+        await previous.disconnect()
+      } finally {
+        this.closingLink = false
+      }
+    }
+    this.link = link
+    this.set({ button: { ...this.snap.button, status: 'connecting', transport } })
     try {
-      await this.serial.connect()
-      this.set({ serial: 'connected', notice: { kind: 'info', text: 'Table button connected. Press it to talk.' } })
-      void this.serial.sendState(this.snap.state)
+      await link.connect()
+      rememberTransport(transport)
+      this.set({
+        button: { ...this.snap.button, status: link.status, transport },
+        notice: {
+          kind: 'info',
+          text: `Table button connected over ${transport === 'usb' ? 'the USB cable' : 'Bluetooth'}. Press it to talk.`,
+        },
+      })
       if (this.snap.voiceEnabled && this.snap.mic === 'unknown') void this.warmMic()
     } catch (err) {
+      if (this.link === link) this.link = null
       const cancelled = err instanceof DOMException && err.name === 'NotFoundError'
       this.set({
-        serial: 'disconnected',
-        notice: cancelled ? null : { kind: 'error', text: `Could not open the table button: ${(err as Error).message}` },
+        button: { ...this.snap.button, status: 'disconnected', transport: null },
+        notice: cancelled ? null : { kind: 'error', text: `Could not connect the table button: ${(err as Error).message}` },
       })
     }
   }
 
-  async disconnectSerial() {
-    await this.serial.disconnect()
-    this.set({ serial: 'disconnected' })
+  async disconnectButton() {
+    const link = this.link
+    this.link = null
+    rememberTransport(null)
+    if (link) {
+      this.closingLink = true
+      try {
+        await link.disconnect()
+      } finally {
+        this.closingLink = false
+      }
+    }
+    this.set({ button: { ...this.snap.button, status: 'disconnected', transport: null } })
   }
 
-  /** Ask for the mic up front so the first serial press records straight away. */
+  /** Ask for the mic up front so the first button press records straight away. */
   private async warmMic() {
     try {
       await this.recorder.ensureStream()
@@ -449,10 +573,10 @@ export class TableConversation {
     this.recorder.cancel()
     this.press.reset()
     this.clearTimers()
-    const { mic, serial, audioLocked, voiceEnabled } = this.snap
-    this.snap = { ...initialSnapshot(), mic, serial, audioLocked, voiceEnabled }
+    const { mic, button, audioLocked, voiceEnabled } = this.snap
+    this.snap = { ...initialSnapshot(), mic, button, audioLocked, voiceEnabled }
     this.seeded = true // a new guest starts blank; do not re-seed from the old session
-    void this.serial.sendState('idle')
+    this.syncButton()
     for (const l of this.listeners) l()
     try {
       await api.resetTable(this.token)

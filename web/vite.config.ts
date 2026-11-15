@@ -23,6 +23,8 @@ export default defineConfig(async ({ command }) => {
 
   return {
     plugins,
+    // A second dev server (e.g. for verification) can keep its own pre-bundle cache.
+    cacheDir: process.env.VITE_CACHE_DIR ?? 'node_modules/.vite',
     resolve: {
       alias: { '@': path.resolve(import.meta.dirname, './src') },
     },
